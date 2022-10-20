@@ -15,7 +15,7 @@
 <main class="main">
     <h1 class="header-1">Заполнение карточки покупателя</h1>
     <div class="container-form-card">
-        <form action="/buyer/" method="post" class="form-card" enctype="multipart/form-data">
+        <form action={% url 'buyer' %} method="post" class="form-card" enctype="multipart/form-data">
             {{ mobiles_form.management_form }}
             {{ mobiles_numbers_form.management_form }}
             {{ stuff_form.management_form }}
