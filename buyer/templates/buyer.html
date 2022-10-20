@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css\buyer-card.css' %}">
+<link rel="stylesheet" href="{% static 'widgets\autocomplete\autocomplete.css' %}">
+
+<script type="text/javascript" src="{% static 'widgets\autocomplete\autocomplete.js' %}"></script>
+
+{{ buyer_form.media }}
+{% endblock styles %}
+
+{% block main %}
+
+<main class="main">
+    <h1 class="header-1">Заполнение карточки покупателя</h1>
+    <div class="container-form-card">
+        <form action="/buyer/" method="post" class="form-card" enctype="multipart/form-data">
+            {{ mobiles_form.management_form }}
+            {{ mobiles_numbers_form.management_form }}
+            {{ stuff_form.management_form }}
+            <h2>Личные данные покупателя</h2>
+            <div class="container-buyer-info">
+                <div class="container-buyer-field-set-1">
+                    <div class="buyer-field-set-1-item">{{ buyer_form.first_name.label_tag }} {{ buyer_form.first_name }}</div>
+
+                    <div class="buyer-field-set-1-item">{{ buyer_form.last_name.label_tag }} {{ buyer_form.last_name }}</div>
+                    <div class="buyer-field-set-1-item">{{ buyer_form.patronymic.label_tag }} {{ buyer_form.patronymic }}</div>
+                    <div class="buyer-field-set-1-item">{{ buyer_form.birth_date.label_tag }} {{ buyer_form.birth_date }}</div>
+                    {{ buyer_form.birth_date.errors }}
+                </div>
+            </div>
+            <h2>Мобильные данные покупателя</h2>
+            <div class="container-buyer-mobile-info">
+                <div class="container-buyer-field-set-2">
+                    {% for mobile_form in mobiles_form %}
+                    <div class="mobile-hidden-field">{{ mobile_form.form_id }}</div>
+                    <div class="container-buyer-field-set-2-subset-1">
+                        <div class="buyer-field-set-2-item">{{ mobile_form.imei.label_tag }} {{ mobile_form.imei }}</div>
+                        {{ mobile_form.imei.errors }}
+                    </div>
+                    <div class="container-buyer-field-set-2-subset-2">
+                        <div class="buyer-field-set-2-item">{{ mobile_form.mobile_brand.label_tag }} {{ mobile_form.mobile_brand }}</div>
+                        {{ mobile_form.mobile_brand.errors }}
+                        <div class="buyer-field-set-2-item">{{ mobile_form.mobile_model.label_tag }} {{ mobile_form.mobile_model }}</div>
+                        {{ mobile_form.mobile_model.errors }}
+                    </div>
+                    <div class="container-buyer-field-set-2-subset-3">
+                        <div class="buyer-field-set-2-item">{{ mobile_form.password.label_tag }} {{ mobile_form.password }}</div>
+                        {{ mobile_form.password.errors }}
+                    </div>
+                    {% endfor %}
+
+                </div>
+                <button id="add-mobile" type="button">Добавить данные телефона</button>
+            </div>
+            <h2>Мобильные телефоны</h2>
+            <div class="container-buyer-mobile-numbers">
+                {% for mobile_number_form in mobiles_numbers_form %}
+                <div class="container-buyer-field-set-3">
+                    <span>{{ mobile_number_form.number.label_tag }}</span>
+                    <span class="buyer-field-set-3-item buyer-field-set-3-item-number-code">+{{ mobile_number_form.code }}</span>
+                    {{ mobile_number_form.code.errors }}
+                    <span class="buyer-field-set-3-item"> {{ mobile_number_form.number }}</span>
+                    {{ mobile_number_form.number.errors }}
+                </div>
+                {% endfor %}
+                <button id="add-mobile-number" type="button">Добавить номер телефона</button>
+            </div>
+
+
+            <h2>Описание изъятого вещества</h2>
+            <div class="container-buyer-stuff">
+                {% for stuff in stuff_form %}
+                <div class="container-buyer-field-set-4">
+                    <div class="buyer-field-set-4-item">{{ stuff.stuff_type.label_tag }} {{ stuff.stuff_type }}</div>
+                    {{ stuff.stuff_type.errors }}
+                    <div class="buyer-field-set-4-item">{{ stuff.mass.label_tag }} {{ stuff.mass }}</div>
+                    {{ stuff.mass.errors }}
+                    <div class="buyer-field-set-4-item">{{ stuff.unit.label_tag }} {{ stuff.unit }}</div>
+                    {{ stuff.unit.errors }}
+                </div>
+                {% endfor %}
+                <button id="add-stuff" type="button">Добавить изъятое вещество</button>
+            </div>
+
+            <h2>Сведения об интернет-магазине</h2>
+            <div class="container-buyer-shop-info">
+                <div class="container-buyer-field-set-5">
+                    <div class="buyer-field-set-5-item">{{ buyer_form.shop_name.label_tag }} {{ buyer_form.shop_name }}</div>
+                    <div class="buyer-field-set-5-item">{{ buyer_form.shop_address.label_tag }} {{ buyer_form.shop_address }}</div>
+                    <div class="buyer-field-set-5-item">{{ buyer_form.shop_messanger_name.label_tag }} {{ buyer_form.shop_messanger_name }}</div>
+                </div>
+            </div>
+
+            <h2>Аккаунт покупателя</h2>
+            <div class="container-buyer-account">
+                <div class="container-buyer-field-set-6">
+
+                    <div class="buyer-field-set-6-item buyer-field-set-6-item-account-name">{{ buyer_form.account_name.label_tag }} {{ buyer_form.account_name }}</div>
+                    <div class="buyer-field-set-6-item buyer-field-set-6-item-account-address">{{ buyer_form.account_address.label_tag }} {{ buyer_form.account_address }}</div>
+                    <div class="buyer-field-set-6-item buyer-field-set-6-item-account-number">{{ buyer_form.account_number.label_tag }} {{ buyer_form.account_number }}</div>
+
+                    <div class="buyer-field-set-6-item">{{ buyer_form.account_login.label_tag }} {{ buyer_form.account_login }}</div>
+                    <div class="buyer-field-set-6-item buyer-field-set-6-item-password">{{ buyer_form.account_password.label_tag }} {{ buyer_form.account_password }}</div>
+                    <div class="buyer-field-set-6-item">{{ buyer_form.account_password_app.label_tag }} {{ buyer_form.account_password_app }}</div>
+                </div>
+            </div>
+
+            <h2>Способ оплаты</h2>
+            <div class="container-buyer-payment">
+                <div class="container-buyer-field-set-7">
+                    <div class="buyer-field-set-7-item">{{ buyer_form.payment.label_tag }} {{ buyer_form.payment }}</div>
+                </div>
+            </div>
+
+
+
+            <h2>Информация об арресте</h2>
+            <div class="container-buyer-arrest">
+                <div class="container-buyer-field-set-8">
+                    <div class="buyer-field-set-8-item">{{ buyer_form.crime_place.label_tag }} {{ buyer_form.crime_place }}</div>
+                    <div class="buyer-field-set-8-item">{{ buyer_form.arrest_date.label_tag }} {{ buyer_form.arrest_date }}</div>
+                    <div class="buyer-field-set-8-item">{{ buyer_form.clad_coordinates.label_tag }} {{ buyer_form.clad_coordinates }}</div>
+                </div>
+            </div>
+
+            {% csrf_token %}
+            <!-- {{ buyer_form.as_p }} -->
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</main>
+<script>
+        setInterval(()=>Autocomplete(), 1000)
+        let mobileForm = document.querySelectorAll(".container-buyer-field-set-2")
+        let mobileContainer = document.querySelector(".container-buyer-mobile-info")
+        let mobileAddButton = document.querySelector("#add-mobile")
+        let mobileTotalForms = document.querySelector("#id_mobiles-TOTAL_FORMS")
+
+        let mobileFormNum = mobileForm.length-1
+        mobileAddButton.addEventListener('click', addMobileForm)
+
+        function addMobileForm(e){
+            e.preventDefault()
+
+            let newForm = mobileForm[0].cloneNode(true)
+            let formRegex = RegExp(`mobiles-(\\d){1,}-`,'g')
+
+
+            mobileFormNum++
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `mobiles-${mobileFormNum}-`)
+            mobileContainer.insertBefore(newForm, mobileAddButton)
+
+            mobileTotalForms.setAttribute('value', `${mobileFormNum+1}`)
+        }
+
+
+        let mobileNumberForm = document.querySelectorAll(".container-buyer-field-set-3")
+        let mobileNumberContainer = document.querySelector(".container-buyer-mobile-numbers")
+        let mobileNumberAddButton = document.querySelector("#add-mobile-number")
+        let mobileNumberTotalForms = document.querySelector("#id_mobiles-numbers-TOTAL_FORMS")
+
+        let mobileNumberFormNum = mobileNumberForm.length-1
+        mobileNumberAddButton.addEventListener('click', addMobileNumberForm)
+
+        function addMobileNumberForm(e){
+            e.preventDefault()
+
+            let newForm = mobileNumberForm[0].cloneNode(true)
+            let formRegex = RegExp(`mobiles-numbers-(\\d){1,}-`,'g')
+
+
+            mobileNumberFormNum++
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `mobiles-numbers-${mobileNumberFormNum}-`)
+            mobileNumberContainer.insertBefore(newForm, mobileNumberAddButton)
+
+            mobileNumberTotalForms.setAttribute('value', `${mobileNumberFormNum+1}`)
+        }
+
+        let stuffForm = document.querySelectorAll(".container-buyer-field-set-4")
+        let stuffContainer = document.querySelector(".container-buyer-stuff")
+        let stuffAddButton = document.querySelector("#add-stuff")
+        let stuffTotalForms = document.querySelector("#id_stuff-TOTAL_FORMS")
+
+        let stuffFormNum = stuffForm.length-1
+        stuffAddButton.addEventListener('click', addStuffForm)
+
+        function addStuffForm(e){
+            e.preventDefault()
+
+            let newForm = stuffForm[0].cloneNode(true)
+            let formRegex = RegExp(`stuff-(\\d){1,}-`,'g')
+
+
+            stuffFormNum++
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `stuff-${stuffFormNum}-`)
+            stuffContainer.insertBefore(newForm, stuffAddButton)
+
+            stuffTotalForms.setAttribute('value', `${stuffFormNum+1}`)
+        }
+
+
+</script>
+{% endblock main %}
+

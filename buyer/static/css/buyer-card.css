@@ -1,0 +1,139 @@
+.container-buyer-info,
+.container-buyer-mobile-info,
+.container-buyer-mobile-numbers,
+.container-buyer-stuff,
+.container-buyer-shop-info,
+.container-buyer-payment,
+.container-buyer-arrest,
+.container-buyer-account
+{
+    /* border: 1px solid black; */
+    background-color:  rgb(241, 241, 241);
+    border-radius: 8px;
+    margin-bottom: 48px;
+    padding: 4px;
+
+}
+
+.container-buyer-field-set-1,
+.container-buyer-field-set-2,
+.container-buyer-field-set-3,
+.container-buyer-field-set-4,
+.container-buyer-field-set-5,
+.container-buyer-field-set-6,
+.container-buyer-field-set-7,
+.container-buyer-field-set-8{
+    display: flex;
+    flex-direction: column;
+}
+
+
+.container-buyer-field-set-2 {
+    margin-bottom: 24px;
+}
+
+.container-buyer-field-set-3 {
+    flex-direction: unset;
+    align-items: center;
+}
+
+.container-buyer-field-set-4 {
+    /* flex-direction: unset; */
+}
+
+.container-buyer-field-set-2-subset-1,
+.container-buyer-field-set-2-subset-2,
+.container-buyer-field-set-2-subset-3,
+.container-buyer-field-set-6-subset-1 {
+    display: flex;
+}
+
+.buyer-field-set-1-item > label,
+.buyer-field-set-2-item > label,
+.buyer-field-set-3-item > label,
+.buyer-field-set-4-item > label,
+.buyer-field-set-5-item > label,
+.buyer-field-set-6-item > label,
+.buyer-field-set-7-item > label,
+.buyer-field-set-8-item > label
+ {
+    display: inline-block;
+    width: max-content;
+}
+
+
+.buyer-field-set-2-item > label {
+    width: 150px;
+}
+
+.buyer-field-set-3-item > label {
+    width: 180px;
+}
+
+.buyer-field-set-5-item {
+    width: 170px;
+}
+
+.buyer-field-set-4-item {
+    display: flex;
+    align-items: center;
+}
+
+
+.buyer-field-set-1-item > input,
+.buyer-field-set-2-item > input,
+.buyer-field-set-3-item > input,
+.buyer-field-set-4-item > input,
+.buyer-field-set-5-item > input,
+.buyer-field-set-6-item > input,
+.buyer-field-set-7-item > input,
+.buyer-field-set-8-item > input {
+
+    background-color: rgb(221, 221, 221);
+    border: none;
+    border-bottom: 1px solid black;
+}
+
+
+.buyer-field-set-1-item,
+.buyer-field-set-2-item,
+.buyer-field-set-3-item,
+.buyer-field-set-4-item,
+.buyer-field-set-5-item,
+.buyer-field-set-6-item,
+.buyer-field-set-7-item,
+.buyer-field-set-8-item
+{
+    margin: 4px 0;
+}
+
+
+
+.buyer-field-set-4-item {
+    display: flex;
+}
+
+.buyer-field-set-4-item > select {
+    height: 24px;
+    margin-left: 16px;
+}
+
+
+
+.buyer-field-set-3-item-number-code {
+    display: inline;
+    margin-right: 8px;
+    margin-left: 8px;
+
+}
+
+.buyer-field-set-3-item-number-code > input {
+    width: 28px;
+    margin-left: 6px;
+    text-align: center;
+}
+
+
+.buyer-field-set-2-item {
+    margin-right: 24px;
+}
