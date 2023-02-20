@@ -1,3 +1,4 @@
+from random import random
 from django import forms
 from django.urls import reverse_lazy
 
@@ -24,6 +25,29 @@ class AutoCompleteWidget(forms.TextInput):
         return html
 
 
+class SwitchFormsWidget(forms.Select):
+    class Media:
+        # js here
+        js = ("widgets/switch_form_widget/switch_form_widget.js",)
+
+    def __init__(self, group_switch, swithces=(), attrs=None) -> None:
+        if attrs is None:
+            attrs = {"switcher": ""}
+        attrs["onchange"] = f"switchForm(event, '{group_switch}', {swithces})"
+        super().__init__(attrs)
+
+    def render(self, name, value, attrs=None, renderer=None):
+        if not attrs:
+            attrs = {}
+        html = super().render(name, value, attrs, renderer)
+        return html
+
+    def create_option(self, *args, **kwargs):
+        kwargs["attrs"]["test"] = "ASD"
+        args = ["test" + str(random()), *args[1:]]
+        return super().create_option(*args, **kwargs)
+
+
 class StuffForm(forms.ModelForm):
     class Meta:
         model = Stuff
@@ -47,24 +71,70 @@ class BuyerForm(forms.ModelForm):
             "last_name",
             "patronymic",
             "birth_date",
+            "shop_type",
             "shop_name",
             "shop_address",
             "shop_messanger_name",
-            "account_name",
-            "account_address",
-            "account_number",
-            "account_login",
-            "account_password",
-            "account_password_app",
             "payment",
             "crime_place",
             "arrest_date",
             "clad_coordinates",
+            "bank_name",
+            "bank_card_number",
+            "online_pay_name",
+            "online_pay_account",
+            "crypto_name",
+            "crypto_address_wallet",
         ]
         widgets = {
             "birth_date": forms.DateInput(attrs={"type": "date"}),
             "arrest_date": forms.DateInput(attrs={"type": "date"}),
+            "shop_type": SwitchFormsWidget(
+                group_switch="shop",
+                swithces=["shop_type_1", "shop_type_2", "shop_type_3"],
+            ),
+            "payment": SwitchFormsWidget(
+                group_switch="payment",
+                swithces=["payment_type_1", "payment_type_2", "payment_type_3"],
+            ),
         }
+
+
+class AccountBuyerForm(forms.Form):
+    login = forms.CharField(
+        label="Логин",
+        required=False,
+    )
+    password = forms.CharField(label="Пароль", max_length=100, required=False)
+    app_password = forms.CharField(
+        label="Пароль приложения", max_length=100, required=False
+    )
+
+
+class MessengerForm(AccountBuyerForm):
+    name = forms.CharField(label="Имя аккаунта", max_length=100, required=False)
+    account_address = forms.CharField(
+        label="«Аккаунт-адрес»", max_length=100, required=False
+    )
+    number = forms.CharField(
+        label="Абонентский номер (привязанный к аккаунту)",
+        max_length=100,
+        required=False,
+    )
+    operator_nickname = forms.CharField(
+        label="Ник-нейм оператора", max_length=100, required=False
+    )
+    operator_account = forms.CharField(
+        label="Аккаунт оператора", max_length=100, required=False
+    )
+
+
+class SiteForm(AccountBuyerForm):
+    ...
+
+
+class DarkWebForm(AccountBuyerForm):
+    ...
 
 
 class MobileNumberForm(forms.ModelForm):

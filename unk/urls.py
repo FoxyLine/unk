@@ -19,12 +19,15 @@ from django.shortcuts import redirect
 from django.urls import path, include, reverse_lazy
 from django.views.generic import RedirectView
 from django.conf.urls.static import static
+from haystack.generic_views import SearchView
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", RedirectView.as_view(url=reverse_lazy("buyer"))),
+    path("", RedirectView.as_view(url=reverse_lazy("create-buyer"))),
     path("", include("buyer.urls")),
+    path("/test/", SearchView.as_view()),
     path("", include("seller.urls")),
     path("", include("search.urls")),
+    path("search-haystack/", include("haystack.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

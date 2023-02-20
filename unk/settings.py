@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from elasticsearch import Elasticsearch
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "haystack",
     "buyer.apps.BuyerConfig",
     "seller.apps.SellerConfig",
     "search.apps.SearchConfig",
@@ -129,3 +131,18 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
     "unk/static/",
 ]
+
+ELASTIC_HOST = "127.0.0.1"
+ELASTIC_PORT = "9200"
+ELASTIC_URL = f"http://{ELASTIC_HOST}:{ELASTIC_PORT}/"
+BUYER_INDEX_NAME = "haystack"
+HAYSTACK_CONNECTIONS = {
+    "default": {
+        "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
+        "URL": ELASTIC_URL,
+        "INDEX_NAME": BUYER_INDEX_NAME,
+    },
+}
+HAYSTACK_DOCUMENT_FIELD = "doc_id"
+HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
+ES = Elasticsearch(hosts=[{"host": ELASTIC_HOST}])

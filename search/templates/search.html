@@ -1,8 +1,69 @@
 {% extends 'base.html' %}
+{% load static %}
 
+{% block styles %}
+<link rel="stylesheet" href="{% static 'base.css' %}">
+<link rel="stylesheet" href="{% static 'css\search.css' %}">
+
+{% endblock styles %}
 {% block main %}
 <main>
-    search BLOCK
+    <div class="search-container">
+        <h1 class="header-1 ">Поиск скупщиков</h1>
+        <div class="search-form-container">
+            <div class="search-form">
+                <form action="{% url 'search' %}" method="POST">
+                    <div class="search-form-field-container">
+                        <div class="search-form-field">{{ form.first_name.label }}: {{ form.first_name }}</div>
+                        <div class="form-field-pair">
+                            <div class="search-form-field">{{ form.start_birth_date.label }}: {{ form.start_birth_date }}</div>
+                            <div class="search-form-field">{{ form.end_birth_date.label }}: {{ form.end_birth_date }}</div>
+                        </div>
+                        <button type="submit" value="Найти" class="btn">Найти</button>
+                        {% csrf_token %}
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="search-result-container">
+            <div class="search-result-container-inner">
+                {% if result %}
+                <table class="buyer-table">
+                    <tbody class="buyer-body-table">
+                        <tr class="buyer-table-column-container">
+                            <th class="buyer-table-column buyer-table-column-header buyer-table-column-first-name">Имя
+                            </th>
+                            <th class="buyer-table-column buyer-table-column-header buyer-table-column-last-name">
+                                Фамилия
+                            </th>
+                            <th class="buyer-table-column buyer-table-column-header buyer-table-column-patrnomic">
+                                Отчество
+                            </th>
+                            <th class="buyer-table-column buyer-table-column-header buyer-table-column-birth-date">Дата
+                                рождения</th>
+                            <th>
+                                <div class="create-buyer-btn-container"><a class="btn-create"
+                                        href="{% url 'create-buyer' %}">Создать</a></div>
+                            </th>
+                        </tr>
+                        {% for buyer in result %}
+                        <tr class="buyer-table-column-container">
+                            <td class="buyer-table-column buyer-table-column-first-name">{{ buyer.first_name }} </td>
+                            <td class="buyer-table-column buyer-table-column-last-name">{{ buyer.last_name }} </td>
+                            <td class="buyer-table-column buyer-table-column-patrnomic">{{ buyer.patronymic }} </td>
+                            <td class="buyer-table-column buyer-table-column-birth-date">{{ buyer.birth_date }}</td>
+                            <td class="buyer-table-column buyer-table-column-edit"><a class="btn-edit"
+                                    href="{% url 'update-buyer' buyer.id %}">Изменить</a></td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                    {% else %}
+                    <div>По запросу ничего не найдено</div>
+                    {% endif %}
+            </div>
+        </div>
+    </div>
 </main>
 {% endblock main %}
-

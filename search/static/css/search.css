@@ -1,0 +1,42 @@
+.search-result-container {
+    display: flex;
+    width: 100%;
+}
+
+.search-result-container-inner {
+    width: 60%;
+    margin: 0 auto;
+}
+
+.search-result {
+    width: 512px;
+    display: flex;
+}
+
+.search-form-container {
+    margin-top: 24px;
+    width: 100%;
+    display: flex;
+}
+
+.search-form {
+
+    margin: 0 auto;
+}
+
+.search-form-field-container {
+    display: flex;
+}
+
+.search-form-field {
+    margin: 0 16px;
+}
+
+.search-container {
+    margin-top: 24px;
+}
+
+.search-result-container-inner {
+    width: 100%;
+}
+
