@@ -31,3 +31,10 @@ urlpatterns = [
     path("", include("search.urls")),
     path("search-haystack/", include("haystack.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+import os
+
+if os.name != 'nt' :
+    urlpatterns = [
+    path('nark/', include(urlpatterns))
+    ]
