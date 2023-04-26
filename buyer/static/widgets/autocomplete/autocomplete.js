@@ -1,7 +1,15 @@
 let input_with_autocomplete = {}
 
-const Autocomplete = () => {
+function replace_last_item(value, separator, targer) {
+  const parts = value.split(separator);
+  const lastPart = parts.pop();
+  parts.push(targer);
+  const newStr = parts.join(separator);
+  return newStr
 
+}
+
+const Autocomplete = () => {
     selector = '[autocomplete-endpoint*="/"]'
     let inputs = document.querySelectorAll(selector);
     function ciSearch(what = '', where = '') {
@@ -19,6 +27,7 @@ const Autocomplete = () => {
 
       input.setAttribute("has-autocomplete", "true")
       let dataEndpoint = input.getAttribute("autocomplete-endpoint")
+      let separator = input.getAttribute("separator")
       console.log(dataEndpoint)
       input.classList.add('autocomplete-input');
       let wrap = document.createElement('div');
@@ -56,28 +65,35 @@ const Autocomplete = () => {
       }
       function selectItem(index) {
         if(!listItems[index]) return false;
-        input.value = listItems[index].innerText;
+        input.value = replace_last_item(input.value, separator, listItems[index].innerText)
         setActive(false);
       }
       let oninput_callback = async () => {
 
         let value = input.value;
-        if(!value) return setActive(false);
+        if (separator){
+          const parts = value.split(separator);
+          const lastPart = parts[parts.length - 1];
+          value = lastPart;
+        }
+        searchValue = value.trim()
+
+        if(!searchValue) return setActive(false);
+
 
         list.innerHTML = '';
         listItems = [];
-        let response = await fetch(dataEndpoint+"?q="+value);
+        let response = await fetch(dataEndpoint+"?q="+searchValue);
         data = await response.json()
         data.forEach((dataItem, index) => {
-
-          let search = ciSearch(value, dataItem);
+          let search = ciSearch(searchValue, dataItem);
           if(search === -1) return false;
           matches.push(index);
 
           let parts = [
             dataItem.substr(0, search),
-            dataItem.substr(search, value.length),
-            dataItem.substr(search + value.length, dataItem.length - search - value.length)
+            dataItem.substr(search, searchValue.length),
+            dataItem.substr(search + searchValue.length, dataItem.length - search - searchValue.length)
           ];
 
           let item = document.createElement('div');

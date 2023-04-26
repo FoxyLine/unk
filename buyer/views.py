@@ -2,16 +2,29 @@ from django.forms import modelformset_factory
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.forms.models import model_to_dict
-from buyer.models import Buyer, BuyerAccount, Mobile, MobileNumber, Stuff, StuffType
+from buyer.models import (
+    Buyer,
+    InternetAccount,
+    Mobile,
+    MobileNumber,
+    Stuff,
+    StuffType,
+    Clad,
+    Bank,
+    Crypto,
+    OnlinePay,
+)
 from .forms import (
     AutoCompleteWidget,
     BuyerForm,
     MobileForm,
     MobileNumberForm,
     StuffForm,
-    MessengerForm,
-    SiteForm,
-    DarkWebForm,
+    InternetAccountForm,
+    CladForm,
+    CryptoForm,
+    BankForm,
+    OnlinePayForm,
 )
 
 from .elastic import more_like_buyer_by_id
@@ -21,13 +34,9 @@ from .elastic import more_like_buyer_by_id
 # ct = ContentType.objects.get_for_id(content_type)
 # obj = ct.get_object_for_this_type(pk=object_id)
 
+
 # Create your views here.
 def create_buyer(request, buyer_id=None):
-    MobileFormSet = modelformset_factory(
-        Mobile,
-        form=MobileForm,
-    )
-    MobileNumberFormSet = modelformset_factory(MobileNumber, form=MobileNumberForm)
     StuffFormSet = modelformset_factory(
         Stuff,
         form=StuffForm,
@@ -37,6 +46,16 @@ def create_buyer(request, buyer_id=None):
             )
         },
     )
+    MobileFormSet = modelformset_factory(
+        Mobile,
+        form=MobileForm,
+    )
+    MobileNumberFormSet = modelformset_factory(MobileNumber, form=MobileNumberForm)
+
+    CladsFormSet = modelformset_factory(Clad, form=CladForm)
+    BankFormSet = modelformset_factory(Bank, form=BankForm, extra=1)
+    OnlinePayFormSet = modelformset_factory(OnlinePay, form=OnlinePayForm, extra=1)
+    CryptoFormSet = modelformset_factory(Crypto, form=CryptoForm, extra=1)
     buyer_instance = None
     similar_buyers = None
     if buyer_id:
@@ -51,57 +70,80 @@ def create_buyer(request, buyer_id=None):
             queryset=Buyer.objects.none(),
             prefix="mobiles",
         )
+
         mobiles_numbers_form = MobileNumberFormSet(
             copy_POST, queryset=Buyer.objects.none(), prefix="mobiles-numbers"
         )
+        clads_form = CladsFormSet(
+            copy_POST, request.FILES, queryset=Buyer.objects.none(), prefix="clads"
+        )
+        bank_form = BankFormSet(copy_POST, queryset=Buyer.objects.none(), prefix="bank")
+        online_pay_form = OnlinePayFormSet(
+            copy_POST, queryset=Buyer.objects.none(), prefix="online-pay"
+        )
+        crypto_form = CryptoFormSet(
+            copy_POST, queryset=Buyer.objects.none(), prefix="crypto"
+        )
+        account = InternetAccountForm(copy_POST)
+
         for key in copy_POST:
             if key.endswith("stuff_type"):
                 name = copy_POST[key]
                 stuff_type, created = StuffType.objects.get_or_create(name=name)
                 copy_POST[key] = stuff_type.pk
+
         stuff_form = StuffFormSet(
             copy_POST,
             queryset=Stuff.objects.filter(buyer=buyer_instance),
             prefix="stuff",
         )
-        messenger_form = MessengerForm(copy_POST, prefix="messenger")
-        site_form = SiteForm(copy_POST, prefix="site")
-        dark_web_form = DarkWebForm(copy_POST, prefix="dark_web")
-
-        shop_type_form = None
-        if buyer_form.data["shop_type"] == Buyer.MESSENGER:
-            shop_type_form = messenger_form
-        elif buyer_form.data["shop_type"] == Buyer.WEB_SITE:
-            shop_type_form = site_form
-        elif buyer_form.data["shop_type"] == Buyer.DARK_NET:
-            shop_type_form = dark_web_form
 
         if (
             buyer_form.is_valid()
             and mobiles_form.is_valid()
             and mobiles_numbers_form.is_valid()
             and stuff_form.is_valid()
-            and (shop_type_form is None or shop_type_form.is_valid())
+            and clads_form.is_valid()
+            and bank_form.is_valid()
+            and online_pay_form.is_valid()
+            and crypto_form.is_valid()
+            and account.is_valid()
         ):
             buyer: Buyer = buyer_form.save(commit=False)
             buyer.save()
-            for mobile in mobiles_form.cleaned_data:
-                if mobile:
-                    mobile = Mobile(**mobile, buyer=buyer)
-                    mobile.save()
+            print(account.cleaned_data)
+            if any(account.cleaned_data.values()):
+                internet_account = InternetAccount(**account.cleaned_data)
+                internet_account.save()
+                buyer.accounts.set([internet_account])
+            print(clads_form.cleaned_data)
 
-            for mobile_number in mobiles_numbers_form.cleaned_data:
-                if mobile_number:
-                    mobile_number = MobileNumber(**mobile_number, buyer=buyer)
-                    mobile_number.save()
+            formsets = [
+                (Mobile, mobiles_form, buyer.mobiles),
+                (MobileNumber, mobiles_numbers_form, buyer.mobile_numbers),
+                (Stuff, stuff_form, buyer.stuffs),
+                (Bank, bank_form, buyer.banks),
+                (OnlinePay, online_pay_form, buyer.online_pays),
+                (Crypto, crypto_form, buyer.cryptos),
+                (Clad, clads_form, buyer.clads),
+            ]
 
-            for stuff in stuff_form.cleaned_data:
-                if stuff:
-                    stuff = Stuff(**stuff, buyer=buyer)
-                    stuff.save()
-            if shop_type_form:
-                buyer_account = BuyerAccount(**shop_type_form.cleaned_data, buyer=buyer)
-                buyer_account.save()
+            for model_class, formset, related_manager in formsets:
+                instances = []
+                for form in formset.cleaned_data:
+                    if not form:
+                        continue
+                    instance = model_class(**form)
+                    if isinstance(form.get("id"), model_class):
+                        instance.id = form["id"].id
+                    if model_class == Clad and form.get("photo") != "":
+                        instance.photo = form.get("photo")
+                    instance.save()
+                    instances.append(instance)
+                if model_class == Clad:
+                    buyer.clads.set(instances)
+                else:
+                    related_manager.set(instances)
 
             if buyer_id:
                 return redirect(
@@ -116,6 +158,7 @@ def create_buyer(request, buyer_id=None):
             stuff_form = StuffFormSet(
                 copy_POST, queryset=Buyer.objects.none(), prefix="stuff"
             )
+
             render(
                 request,
                 template_name="card-buyer.html",
@@ -125,25 +168,64 @@ def create_buyer(request, buyer_id=None):
                     "mobiles_form": mobiles_form,
                     "mobiles_numbers_form": mobiles_numbers_form,
                     "stuff_form": stuff_form,
-                    "messanger_form": messenger_form,
-                    "site_form": site_form,
-                    "dark_web_form": dark_web_form,
                     "similar_buyers": similar_buyers,
+                    "clads_form": clads_form,
+                    "bank_form": bank_form,
+                    "online_pay_form": online_pay_form,
+                    "crypto_form": crypto_form,
+                    "account": account,
                 },
             )
     else:
         buyer_form = BuyerForm(instance=buyer_instance)
-        messenger_form = MessengerForm(prefix="messenger")
-        site_form = SiteForm(prefix="site")
-        dark_web_form = DarkWebForm(prefix="dark_web")
-        mobiles_form = MobileFormSet(queryset=Buyer.objects.none(), prefix="mobiles")
-        mobiles_numbers_form = MobileNumberFormSet(
-            queryset=Mobile.objects.filter(buyer=buyer_instance),
-            prefix="mobiles-numbers",
-        )
-        stuff_form = StuffFormSet(
-            queryset=Stuff.objects.filter(buyer=buyer_instance), prefix="stuff"
-        )
+        if buyer_instance and buyer_instance.get_account():
+            account = InternetAccountForm(
+                data=model_to_dict(buyer_instance.get_account())
+            )
+        else:
+            account = InternetAccountForm()
+
+        if buyer_instance:
+            mobiles_form = MobileFormSet(
+                queryset=buyer_instance.mobiles.all(), prefix="mobiles"
+            )
+            mobiles_numbers_form = MobileNumberFormSet(
+                queryset=buyer_instance.mobile_numbers.all(), prefix="mobiles-numbers"
+            )
+            stuff_form = StuffFormSet(
+                queryset=buyer_instance.stuffs.all(), prefix="stuff"
+            )
+            clads_form = CladsFormSet(
+                queryset=buyer_instance.clads.all(), prefix="clads"
+            )
+            bank_form = BankFormSet(queryset=buyer_instance.banks.all(), prefix="bank")
+            online_pay_form = OnlinePayFormSet(
+                queryset=buyer_instance.online_pays.all(), prefix="online-pay"
+            )
+            crypto_form = CryptoFormSet(
+                queryset=buyer_instance.cryptos.all(), prefix="crypto"
+            )
+
+        else:
+            mobiles_form = MobileFormSet(
+                queryset=MobileNumber.objects.none(), prefix="mobiles"
+            )
+            mobiles_numbers_form = MobileNumberFormSet(
+                queryset=MobileNumber.objects.none(), prefix="mobiles-numbers"
+            )
+            stuff_form = StuffFormSet(
+                queryset=MobileNumber.objects.none(), prefix="stuff"
+            )
+            clads_form = CladsFormSet(
+                queryset=MobileNumber.objects.none(), prefix="clads"
+            )
+            bank_form = BankFormSet(queryset=MobileNumber.objects.none(), prefix="bank")
+            online_pay_form = OnlinePayFormSet(
+                queryset=MobileNumber.objects.none(), prefix="online-pay"
+            )
+            crypto_form = CryptoFormSet(
+                queryset=MobileNumber.objects.none(), prefix="crypto"
+            )
     return render(
         request,
         template_name="card-buyer.html",
@@ -153,10 +235,12 @@ def create_buyer(request, buyer_id=None):
             "mobiles_form": mobiles_form,
             "mobiles_numbers_form": mobiles_numbers_form,
             "stuff_form": stuff_form,
-            "messanger_form": messenger_form,
-            "site_form": site_form,
-            "dark_web_form": dark_web_form,
             "similar_buyers": similar_buyers,
+            "clads_form": clads_form,
+            "bank_form": bank_form,
+            "online_pay_form": online_pay_form,
+            "crypto_form": crypto_form,
+            "account": account,
         },
     )
 

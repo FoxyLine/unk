@@ -4,66 +4,126 @@
 {% block styles %}
 <link rel="stylesheet" href="{% static 'base.css' %}">
 <link rel="stylesheet" href="{% static 'css\search.css' %}">
-
+{{ form.media }}
 {% endblock styles %}
 {% block main %}
 <main>
     <div class="search-container">
         <h1 class="header-1 ">Поиск скупщиков</h1>
-        <div class="search-form-container">
-            <div class="search-form">
-                <form action="{% url 'search' %}" method="POST">
-                    <div class="search-form-field-container">
-                        <div class="search-form-field">{{ form.first_name.label }}: {{ form.first_name }}</div>
-                        <div class="form-field-pair">
-                            <div class="search-form-field">{{ form.start_birth_date.label }}: {{ form.start_birth_date }}</div>
-                            <div class="search-form-field">{{ form.end_birth_date.label }}: {{ form.end_birth_date }}</div>
+        <div class="search-inner-container">
+            <div class="search-form-container">
+                <div class="search-form">
+                    <form action="{% url 'search' %}" method="POST">
+                        <div class="search-form-field-container">
+                            <div class="form-field-pair">
+                                <div class="search-form-field">{{ form.first_name.label }}: {{ form.first_name }}</div>
+                                <div class="search-form-field">{{ form.last_name.label }}: {{ form.last_name }}</div>
+                                <div class="search-form-field">{{ form.patronymic.label }}: {{ form.patronymic }}</div>
+                            </div>
+                            <div class="form-field-pair">
+                                <div class="search-form-field">{{ form.start_birth_date.label }}: {{ form.start_birth_date }}</div>
+                                <div class="search-form-field">{{ form.end_birth_date.label }}: {{ form.end_birth_date }}</div>
+                            </div>
+                            <div class="search-form-stuffs"> Вещества:
+                                <div class="search-form-field">{{ form.stuffs }}</div>
+                                <div class="search-form-field">{{ form.all_stuffs.label }}: {{ form.all_stuffs }}</div>
+                                <span>Масса</span>
+                                <div class="search-form-stuffs-mass">{{ form.start_stuff_mass.label}} {{ form.start_stuff_mass}} {{ form.start_stuff_mass_unit }}</div>
+                                <div class="search-form-stuffs-mass">{{ form.end_stuff_mass.label}} {{ form.end_stuff_mass}} {{ form.end_stuff_mass_unit }}</div>
+                            </div>
+                            <div>
+                                <h3>Мобильные телефоны</h3>
+
+                                <div class="search-form-field">{{ form.mobile_imei.label}}: {{ form.mobile_imei }}</div>
+                                <div class="search-form-field">{{ form.mobile_brand.label}}: {{ form.mobile_brand }}</div>
+                                <div class="search-form-field">{{ form.mobile_model.label}}: {{ form.mobile_model }}</div>
+                                <div class="search-form-field">{{ form.mobile_password.label}}: {{ form.mobile_password }}</div>
+                                <div class="search-form-field">{{ form.mobile_number_search_option}}{{ form.mobile_number.label}}: {{ form.mobile_number  }}</div>
+                            </div>
+                            <div>
+                                <h3>Способы оплаты</h3>
+                                <h4>Банковская карта</h4>
+                                <div class="search-form-field">{{ form.bank_name.label }}: {{ form.bank_name }}</div>
+                                <div class="search-form-field">{{ form.bank_card_number.label }}: {{ form.bank_card_number }}</div>
+                                <h4>Электронные платежи</h4>
+                                <div class="search-form-field">{{ form.online_pay_name.label }}: {{ form.online_pay_name }}</div>
+                                <div class="search-form-field">{{ form.online_pay_account.label }}: {{ form.online_pay_account }}</div>
+                                <h4>Криптовалюта</h4>
+                                <div class="search-form-field">{{ form.crypto_name.label }}: {{ form.crypto_name }}</div>
+                                <div class="search-form-field">{{ form.crypto_address_wallet.label }}: {{ form.crypto_address_wallet }}</div>
+
+                            </div>
+                            <div>
+                                <h3>Аккаунт покупателя</h3>
+                                <div class="search-form-field">{{ form.account_login.label }}: {{ form.account_login }}</div>
+                                <div class="search-form-field">{{ form.account_password.label }}: {{ form.account_password }}</div>
+                                <div class="search-form-field">{{ form.account_app_password.label }}: {{ form.account_app_password }}</div>
+                                <div class="search-form-field">{{ form.account_name.label }}: {{ form.account_name }}</div>
+                                <div class="search-form-field">{{ form.account_address.label }}: {{ form.account_address }}</div>
+                                <div class="search-form-field">{{ form.account_number.label }}: {{ form.account_number }}</div>
+                                <div class="search-form-field">{{ form.account_operator_nickname.label }}: {{ form.account_operator_nickname }}</div>
+                                <div class="search-form-field">{{ form.account_operator_account.label }}: {{ form.account_operator_account }}</div>
+                            </div>
+                            <button type="submit" value="Найти" class="btn">Найти</button>
+                            {% csrf_token %}
                         </div>
-                        <button type="submit" value="Найти" class="btn">Найти</button>
-                        {% csrf_token %}
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div class="search-result-container">
-            <div class="search-result-container-inner">
-                {% if result %}
-                <table class="buyer-table">
-                    <tbody class="buyer-body-table">
-                        <tr class="buyer-table-column-container">
-                            <th class="buyer-table-column buyer-table-column-header buyer-table-column-first-name">Имя
-                            </th>
-                            <th class="buyer-table-column buyer-table-column-header buyer-table-column-last-name">
-                                Фамилия
-                            </th>
-                            <th class="buyer-table-column buyer-table-column-header buyer-table-column-patrnomic">
-                                Отчество
-                            </th>
-                            <th class="buyer-table-column buyer-table-column-header buyer-table-column-birth-date">Дата
-                                рождения</th>
-                            <th>
-                                <div class="create-buyer-btn-container"><a class="btn-create"
-                                        href="{% url 'create-buyer' %}">Создать</a></div>
-                            </th>
-                        </tr>
-                        {% for buyer in result %}
-                        <tr class="buyer-table-column-container">
-                            <td class="buyer-table-column buyer-table-column-first-name">{{ buyer.first_name }} </td>
-                            <td class="buyer-table-column buyer-table-column-last-name">{{ buyer.last_name }} </td>
-                            <td class="buyer-table-column buyer-table-column-patrnomic">{{ buyer.patronymic }} </td>
-                            <td class="buyer-table-column buyer-table-column-birth-date">{{ buyer.birth_date }}</td>
-                            <td class="buyer-table-column buyer-table-column-edit"><a class="btn-edit"
-                                    href="{% url 'update-buyer' buyer.id %}">Изменить</a></td>
-                        </tr>
+            <div class="search-result-container">
+                <div class="search-result-container-inner">
+                    {% if result %}
+                    <table class="buyer-table">
+                        <tbody class="buyer-body-table">
+                            <tr class="buyer-table-column-container">
+                                <th class="buyer-table-column buyer-table-column-header buyer-table-column-first-name">Имя
+                                </th>
+                                <th class="buyer-table-column buyer-table-column-header buyer-table-column-last-name">
+                                    Фамилия
+                                </th>
+                                <th class="buyer-table-column buyer-table-column-header buyer-table-column-patrnomic">
+                                    Отчество
+                                </th>
+                                <th class="buyer-table-column buyer-table-column-header buyer-table-column-birth-date">Дата
+                                    рождения</th>
+                                <th>
+                                    <div class="create-buyer-btn-container"><a class="btn-create"
+                                            href="{% url 'create-buyer' %}">Создать</a></div>
+                                </th>
+                                <!-- <th></th> -->
+                            </tr>
+                            {% for buyer in result %}
+                            <tr class="buyer-table-column-container">
+                                <td class="buyer-table-column buyer-table-column-first-name">{{ buyer.first_name }} </td>
+                                <td class="buyer-table-column buyer-table-column-last-name">{{ buyer.last_name }} </td>
+                                <td class="buyer-table-column buyer-table-column-patrnomic">{{ buyer.patronymic }} </td>
+                                <td class="buyer-table-column buyer-table-column-birth-date">{{ buyer.birth_date }}</td>
+                                <!-- <td class="buyer-table-column buyer-table-column-birth-date">
+                                     <div>
+                                    {% if buyer.stuffs.all %}
+                                    <span>Вещества:
+                                        {% for stuff in buyer.stuffs.all %}
+                                        {{ stuff.stuff_type.name }}:{{ stuff.mass }}:{{ stuff.unit }}
+                                        {% endfor %}
+                                        {% endif %}
+                                    </span>
+                                </div></td> -->
+                                <td class="buyer-table-column buyer-table-column-edit"><a class="btn-edit"
+                                        href="{% url 'update-buyer' buyer.id %}">Изменить</a></td>
+                            </tr>
 
-                        {% endfor %}
+                            {% endfor %}
 
-                    </tbody>
-                    {% else %}
-                    <div>По запросу ничего не найдено</div>
-                    {% endif %}
+                        </tbody>
+                        {% else %}
+                        <div>По запросу ничего не найдено</div>
+                        {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </main>
+<script>
+    setInterval(() => Autocomplete(), 1000)
+</script>
 {% endblock main %}

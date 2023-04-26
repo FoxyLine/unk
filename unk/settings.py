@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-v#9!1%8z!#ihzm^sibv@y4lc5e_!ujhywppt4dc36$^2@mizo$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -67,6 +67,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.media",
             ],
         },
     },
@@ -85,6 +86,16 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.contrib.gis.db.backends.postgis",
+#         'NAME': 'postgres',
+#         'USER': 'postgres',
+#         'PASSWORD': 'postgres',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -121,12 +132,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 
-
 import os
 
 STATIC_URL = "static/"
 
-if os.name != 'nt' :
+if os.name != "nt":
     STATIC_URL = "nark/static/"
 
 
@@ -140,13 +150,16 @@ STATICFILES_DIRS = [
     "unk/static/",
 ]
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 ELASTIC_HOST = "127.0.0.1"
 ELASTIC_PORT = "9200"
 ELASTIC_URL = f"http://{ELASTIC_HOST}:{ELASTIC_PORT}/"
 BUYER_INDEX_NAME = "haystack"
 HAYSTACK_CONNECTIONS = {
     "default": {
-        "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
+        "ENGINE": "unk.haystack_backend.engine.Engine",
         "URL": ELASTIC_URL,
         "INDEX_NAME": BUYER_INDEX_NAME,
     },

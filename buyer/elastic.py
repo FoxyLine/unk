@@ -6,7 +6,6 @@ es: Elasticsearch = settings.ES
 
 
 def more_like_buyer_by_id(buyer_id, limit=5, fields=None) -> Buyer:
-
     results = es.search(
         {
             "query": {
@@ -57,6 +56,7 @@ def multi_match_find(query, limit=10):
         ids.append(hit["_source"]["django_id"])
 
     return Buyer.objects.filter(id__in=ids)
+
 
 def search_by_clause(clause, limit=10):
     results = es.search(

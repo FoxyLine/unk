@@ -2,12 +2,23 @@ from random import random
 from django import forms
 from django.urls import reverse_lazy
 
-from .models import Buyer, Mobile, MobileNumber, Stuff
+from .models import (
+    Buyer,
+    Mobile,
+    MobileNumber,
+    Stuff,
+    Clad,
+    OnlinePay,
+    Crypto,
+    Bank,
+    InternetAccount,
+)
 
 
 class AutoCompleteWidget(forms.TextInput):
-    def __init__(self, data_endpoint, attrs=None) -> None:
+    def __init__(self, data_endpoint, separator=None, attrs=None) -> None:
         self.data_endpoint = data_endpoint
+        self.separator = separator
         super().__init__(attrs)
 
     class Media:
@@ -20,6 +31,8 @@ class AutoCompleteWidget(forms.TextInput):
             attrs = {}
 
         attrs["autocomplete"] = "off"
+        if self.separator:
+            attrs["separator"] = self.separator
         attrs["autocomplete-endpoint"] = self.data_endpoint
         html = super().render(name, value, attrs, renderer)
         return html
@@ -78,13 +91,6 @@ class BuyerForm(forms.ModelForm):
             "payment",
             "crime_place",
             "arrest_date",
-            "clad_coordinates",
-            "bank_name",
-            "bank_card_number",
-            "online_pay_name",
-            "online_pay_account",
-            "crypto_name",
-            "crypto_address_wallet",
         ]
         widgets = {
             "birth_date": forms.DateInput(attrs={"type": "date"}),
@@ -100,47 +106,31 @@ class BuyerForm(forms.ModelForm):
         }
 
 
-class AccountBuyerForm(forms.Form):
-    login = forms.CharField(
-        label="Логин",
-        required=False,
-    )
-    password = forms.CharField(label="Пароль", max_length=100, required=False)
-    app_password = forms.CharField(
-        label="Пароль приложения", max_length=100, required=False
-    )
-
-
-class MessengerForm(AccountBuyerForm):
-    name = forms.CharField(label="Имя аккаунта", max_length=100, required=False)
-    account_address = forms.CharField(
-        label="«Аккаунт-адрес»", max_length=100, required=False
-    )
-    number = forms.CharField(
-        label="Абонентский номер (привязанный к аккаунту)",
-        max_length=100,
-        required=False,
-    )
-    operator_nickname = forms.CharField(
-        label="Ник-нейм оператора", max_length=100, required=False
-    )
-    operator_account = forms.CharField(
-        label="Аккаунт оператора", max_length=100, required=False
-    )
-
-
-class SiteForm(AccountBuyerForm):
-    ...
-
-
-class DarkWebForm(AccountBuyerForm):
-    ...
+class InternetAccountForm(forms.ModelForm):
+    class Meta:
+        model = InternetAccount
+        fields = [
+            "login",
+            "password",
+            "app_password",
+            "name",
+            "account_address",
+            "number",
+            "operator_nickname",
+            "operator_account",
+        ]
 
 
 class MobileNumberForm(forms.ModelForm):
     class Meta:
         model = MobileNumber
-        fields = ["code", "number"]
+        fields = ["number"]
+
+
+class CladForm(forms.ModelForm):
+    class Meta:
+        model = Clad
+        fields = ["lng", "lat", "photo"]
 
 
 class MobileForm(forms.ModelForm):
@@ -153,22 +143,29 @@ class MobileForm(forms.ModelForm):
             "password",
         ]
 
-        # fields = [
-        #     "imei",
-        #     "mobile_brand",
-        #     "mobile_model",
-        #     "password",
-        #     "mobile_number",
-        #     "stuff_type",
-        #     "stuff_mass",
-        #     "unit",
-        #     "shop_name",
-        #     "shop_info",
-        #     "operator_nickname",
-        #     "operator_account",
-        #     "account",
-        #     "payment_type",
-        #     "crime_place",
-        #     "arrest_date",
-        #     "clad_coordinates",
-        # ]
+
+class BankForm(forms.ModelForm):
+    class Meta:
+        model = Bank
+        fields = [
+            "name",
+            "card_number",
+        ]
+
+
+class OnlinePayForm(forms.ModelForm):
+    class Meta:
+        model = OnlinePay
+        fields = [
+            "name",
+            "account",
+        ]
+
+
+class CryptoForm(forms.ModelForm):
+    class Meta:
+        model = Crypto
+        fields = [
+            "name",
+            "address_wallet",
+        ]

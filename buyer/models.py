@@ -1,5 +1,6 @@
 from email.policy import default
 from django.db import models
+from django.core.validators import RegexValidator
 
 import buyer
 
@@ -26,9 +27,6 @@ class Stuff(models.Model):
         (GRAMM, "г"),
         (KILO, "кг"),
     )
-    buyer = models.ForeignKey(
-        "Buyer", default=None, on_delete=models.DO_NOTHING, related_name="stuffs"
-    )
 
     stuff_type = models.ForeignKey(
         StuffType, on_delete=models.DO_NOTHING, verbose_name="Вещество"
@@ -51,29 +49,25 @@ class Stuff(models.Model):
         verbose_name = "Вещество"
         verbose_name_plural = "Вещества"
 
+    def std_mass(self):
+        return Stuff.normalize_mass(self.mass, self.unit)
+
+    @staticmethod
+    def normalize_mass(mass, unit):
+        return mass * {Stuff.GRAMM: 1000, Stuff.KILO: 1000 * 1000}.get(unit, 1)
+
     def __str__(self):
         return f"{self.stuff_type} {self.mass or 0} {self.unit or ''}."
 
 
-# class Payment(models.Model):
-#     name = models.CharField(max_length=255)
-
-
-class CrimePlace(models.Model):
-    name = models.CharField(max_length=255)
-
-
 class PhotoClad(models.Model):
     describe = models.CharField(max_length=255)
-    image = models.ImageField()
+    image = models.ImageField(upload_to="files/", null=True, blank=True)
 
     buyer = models.ForeignKey("Buyer", on_delete=models.DO_NOTHING)
 
 
 class Mobile(models.Model):
-    buyer = models.ForeignKey(
-        "Buyer", default=None, on_delete=models.DO_NOTHING, related_name="mobiles"
-    )
     imei = models.CharField(
         max_length=255, verbose_name="IMEI-номер", null=True, blank=True
     )
@@ -93,46 +87,44 @@ class Mobile(models.Model):
 
 
 class MobileNumber(models.Model):
-    buyer = models.ForeignKey(
-        "Buyer", default=None, on_delete=models.DO_NOTHING, related_name="numbers"
+    phone_regex = RegexValidator(
+        regex=r"^\+?1?\d{9,15}$",
+        message="Формат номера телефона должен соответствовать: '+XXXXXXXXX'. Максимальная длина - 15 цифр.",
     )
-    code = models.IntegerField(default=7, verbose_name="Код страны")
-    number = models.CharField(max_length=15, verbose_name="Номер телефона")
+
+    number = models.CharField(
+        # validators=[phone_regex],
+        max_length=17,
+        # unique=True,
+        verbose_name="Номер телефона",
+    )
 
     class Meta:
         verbose_name = "Номер телефона"
         verbose_name_plural = "Телефонные номера"
 
 
-class BuyerAccount(models.Model):
-    buyer = models.OneToOneField(
-        "Buyer",
-        default=None,
-        on_delete=models.CASCADE,
-        related_name="account",
-        primary_key=True,
-    )
+class InternetAccount(models.Model):
     login = models.CharField(
-        verbose_name="Логин",
-        max_length=100,
-        null=True,
+        verbose_name="Логин", max_length=100, null=True, blank=True
     )
     password = models.CharField(
-        verbose_name="Пароль",
-        max_length=100,
-        null=True,
+        verbose_name="Пароль", max_length=100, null=True, blank=True
     )
     app_password = models.CharField(
-        verbose_name="Пароль приложения", max_length=100, null=True
+        verbose_name="Пароль приложения", max_length=100, null=True, blank=True
     )
-    name = models.CharField(verbose_name="Имя аккаунта", max_length=100, null=True)
+    name = models.CharField(
+        verbose_name="Имя аккаунта", max_length=100, null=True, blank=True
+    )
     account_address = models.CharField(
-        verbose_name="«Аккаунт-адрес»", max_length=100, null=True
+        verbose_name="«Аккаунт-адрес»", max_length=100, null=True, blank=True
     )
     number = models.CharField(
         verbose_name="Абонентский номер (привязанный к аккаунту)",
         max_length=100,
         null=True,
+        blank=True,
     )
 
     operator_nickname = models.CharField(
@@ -142,13 +134,78 @@ class BuyerAccount(models.Model):
         max_length=255, verbose_name="Аккаунт оператора", null=True, blank=True
     )
 
-    class Meta:
+    def __str__(self) -> str:
+        return f"pk {self.pk} Логин: {self.login}, Пароль: {self.password}, Пароль приложения: {self.app_password}, Имя аккаунта: {self.name}, «Аккаунт-адрес»: {self.account_address}, Абонентский номер (привязанный к аккаунту): {self.number}, Ник-нейм оператора: {self.operator_nickname}, Аккаунт оператора: {self.operator_account}"
 
+    class Meta:
         verbose_name = "Аккаунт пакупателя"
         verbose_name_plural = "Аккаунт пакупателя"
 
 
+class Bank(models.Model):
+    name = models.CharField(
+        max_length=255, verbose_name="Название банка", null=True, blank=True
+    )
+    card_number = models.CharField(
+        max_length=255, verbose_name="Номер банковской карты", null=True, blank=True
+    )
+
+    def __str__(self):
+        return self.name or ""
+
+    class Meta:
+        verbose_name = "Банковские реквизиты"
+        verbose_name_plural = "Банковские реквизиты"
+
+
+class OnlinePay(models.Model):
+    name = models.CharField(
+        max_length=255, verbose_name="Название платежной системы", null=True, blank=True
+    )
+    account = models.CharField(
+        max_length=255, verbose_name="Номер счета", null=True, blank=True
+    )
+
+    def __str__(self):
+        return self.name or ""
+
+    class Meta:
+        verbose_name = "Онлайн-платежи"
+        verbose_name_plural = "Онлайн-платежи"
+
+
+class Crypto(models.Model):
+    name = models.CharField(
+        max_length=255, verbose_name="Название криптовалюты", null=True, blank=True
+    )
+    address_wallet = models.CharField(
+        max_length=255, verbose_name="Адрес кошелька", null=True, blank=True
+    )
+
+    def __str__(self):
+        return self.name or ""
+
+    class Meta:
+        verbose_name = "Криптовалюты"
+        verbose_name_plural = "Криптовалюты"
+
+
 class Buyer(models.Model):
+    mobiles = models.ManyToManyField("Mobile", default=None, through="BuyerMobile")
+    stuffs = models.ManyToManyField("Stuff", through="BuyerStuff")
+    clads = models.ManyToManyField("Clad", through="BuyerClads")
+    mobile_numbers = models.ManyToManyField(
+        "MobileNumber", through="BuyerMobileNumber", related_name="buyer_mobile_numbers"
+    )
+    banks = models.ManyToManyField(Bank, related_name="buyers", blank=True)
+    cryptos = models.ManyToManyField(Crypto, related_name="buyers", blank=True)
+    online_pays = models.ManyToManyField(OnlinePay, related_name="buyers", blank=True)
+
+    accounts = models.ManyToManyField(
+        "InternetAccount",
+        default=None,
+        related_name="accounts",
+    )
 
     first_name = models.CharField(
         max_length=255, verbose_name="Имя", null=True, blank=True, default=None
@@ -195,7 +252,7 @@ class Buyer(models.Model):
         default=None,
     )
 
-    SHOP_CHOICES = (
+    PAYMENT_CHOICES = (
         ("Банковская карта", "Банковская карта"),
         ("Электронные платежи", "Электронные платежи"),
         ("Криптовалюта", "Криптовалюта"),
@@ -205,30 +262,7 @@ class Buyer(models.Model):
         verbose_name="Способ оплаты",
         null=True,
         blank=True,
-        choices=SHOP_CHOICES,
-    )
-
-    bank_name = models.CharField(
-        max_length=255, verbose_name="Название банка", null=True, blank=True
-    )
-    bank_card_number = models.CharField(
-        max_length=255, verbose_name="Номер банковской карты", null=True, blank=True
-    )
-
-    online_pay_name = models.CharField(
-        max_length=255, verbose_name="Название платежной системы", null=True, blank=True
-    )
-
-    online_pay_account = models.CharField(
-        max_length=255, verbose_name="Номер счета", null=True, blank=True
-    )
-
-    crypto_name = models.CharField(
-        max_length=255, verbose_name="Название криптовалюты", null=True, blank=True
-    )
-
-    crypto_address_wallet = models.CharField(
-        max_length=255, verbose_name="Адрес кошелька", null=True, blank=True
+        choices=PAYMENT_CHOICES,
     )
 
     CRIME_PLACE_CHOICES = [
@@ -277,13 +311,67 @@ class Buyer(models.Model):
     arrest_date = models.DateTimeField(
         verbose_name="Дата задержания", null=True, blank=True
     )
-    clad_coordinates = models.CharField(
-        max_length=255, verbose_name="Координаты клада", null=True, blank=True
-    )
 
     class Meta:
         verbose_name = "Скупщик"
         verbose_name_plural = "Скупщики"
 
-    def __str__(self):
-        return f"{self.first_name or ''} {self.last_name or ''} {self.patronymic or ''} Дата ареста:{self.arrest_date}. Вещества: {','.join([s.stuff_type.name for s in self.stuffs.all()])}"
+    def get_account(self) -> InternetAccount:
+        accounts = self.accounts.all()
+        if len(accounts) > 1:
+            raise "accounts > 1"
+        return accounts[0] if accounts else None
+
+    # def __str__(self):
+    #     return f"{self.first_name or ''} {self.last_name or ''} {self.patronymic or ''} Дата ареста:{self.arrest_date}. Вещества: {','.join([s.stuff_type.name for s in self.stuffs.all()])}"
+
+
+class Clad(models.Model):
+    MASTER_CLAD = "Мастер-клад"
+    CLAD = "Закладка"
+    TYPE_CLAD_CHOICES = (
+        (MASTER_CLAD, "Мастер-клад"),
+        (CLAD, "Закладка"),
+    )
+    type_clad = models.CharField(
+        max_length=25, choices=TYPE_CLAD_CHOICES, blank=True, null=True, default=CLAD
+    )
+    lng = models.DecimalField(
+        max_digits=11,
+        decimal_places=8,
+        verbose_name="Координаты клада (долгота)",
+        null=True,
+        blank=True,
+    )
+    lat = models.DecimalField(
+        max_digits=11,
+        decimal_places=8,
+        verbose_name="Координаты клада (Ширина)",
+        null=True,
+        blank=True,
+    )
+    photo = models.ImageField(
+        verbose_name="Фотография клада",
+        null=True,
+        blank=True,
+    )
+
+
+class BuyerClads(models.Model):
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
+    clad = models.ForeignKey(Clad, on_delete=models.CASCADE)
+
+
+class BuyerMobile(models.Model):
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
+    mobile = models.ForeignKey(Mobile, on_delete=models.CASCADE)
+
+
+class BuyerStuff(models.Model):
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
+    mobile = models.ForeignKey(Stuff, on_delete=models.CASCADE)
+
+
+class BuyerMobileNumber(models.Model):
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
+    mobile_number = models.ForeignKey(MobileNumber, on_delete=models.CASCADE)

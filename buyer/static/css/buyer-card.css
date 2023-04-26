@@ -5,7 +5,8 @@
 .container-buyer-shop-info,
 .container-buyer-payment,
 .container-buyer-arrest,
-.container-buyer-account {
+.container-buyer-account,
+.container-clad-coord {
     /* border: 1px solid black; */
     background-color: rgb(241, 241, 241);
     border-radius: 8px;
@@ -21,7 +22,8 @@
 .container-buyer-field-set-5,
 .container-buyer-field-set-6,
 .container-buyer-field-set-7,
-.container-buyer-field-set-8 {
+.container-buyer-field-set-8,
+.container-buyer-field-set-9 {
     display: flex;
     flex-direction: column;
 }
@@ -32,8 +34,8 @@
 }
 
 .container-buyer-field-set-3 {
-    flex-direction: unset;
-    align-items: center;
+    /* flex-direction: unset; */
+    /* align-items: center; */
 }
 
 .container-buyer-field-set-2-subset-1,
@@ -50,7 +52,9 @@
 .buyer-field-set-5-item>label,
 .buyer-field-set-6-item>label,
 .buyer-field-set-7-item>label,
-.buyer-field-set-8-item>label {
+.buyer-field-set-8-item>label,
+.buyer-field-set-9-item>label {
+
     display: inline-block;
     width: max-content;
 }
@@ -81,7 +85,8 @@
 .buyer-field-set-5-item>input,
 .buyer-field-set-6-item>input,
 .buyer-field-set-7-item>input,
-.buyer-field-set-8-item>input {
+.buyer-field-set-8-item>input
+.buyer-field-set-9-item>input {
 
     background-color: rgb(221, 221, 221);
     border: none;
@@ -96,7 +101,8 @@
 .buyer-field-set-5-item,
 .buyer-field-set-6-item,
 .buyer-field-set-7-item,
-.buyer-field-set-8-item {
+.buyer-field-set-8-item
+.buyer-field-set-9-item {
     margin: 4px 0;
 }
 

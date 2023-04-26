@@ -199,3 +199,9 @@ tr {
 tr:nth-child(2n) {
     background: rgb(223, 221, 221);
 }
+
+
+.common-image {
+    width: 300px;
+    height: 300px;
+}

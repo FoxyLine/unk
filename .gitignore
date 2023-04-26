@@ -1,3 +1,5 @@
 unk-venv/
 db.sqlite3
 *.pyc
+media
+.vscode

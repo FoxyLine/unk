@@ -15,44 +15,51 @@
 <main class="main">
     {% if similar_buyers %}
     <div class="container-similar-buyers">
-    <h2 class="header-2">Похожие скупщики</h2>
-    <div class="similar-buyers">
-    {% for buyer in similar_buyers %}
-        <div class="similar-buyer">
-            <div>
-                <div><span>{{ buyer.first_name }}</span></div>
-                <div><span>{{ buyer.last_name }}</span></div>
-                <div><span>{{ buyer.patranomyc }}</span></div>
-                <div><span>Дата Рождения: {{ buyer.birth_date }}</span></div>
+        <h2 class="header-2">Похожие скупщики</h2>
+        <div class="similar-buyers">
+            {% for buyer in similar_buyers %}
+            <div class="similar-buyer">
+                <div>
+                    <div><span>{{ buyer.first_name }}</span></div>
+                    <div><span>{{ buyer.last_name }}</span></div>
+                    <div><span>{{ buyer.patranomyc }}</span></div>
+                    <div><span>Дата Рождения: {{ buyer.birth_date }}</span></div>
+                </div>
+                <div>
+                    {% if buyer.stuffs.all %}
+                    <span>Вещества:
+                        {% for stuff in buyer.stuffs.all %}
+                        {{ stuff.stuff_type.name }}
+                        {% endfor %}
+                        {% endif %}
+                    </span>
+                </div>
+                <div><a href="{% url 'update-buyer' buyer.id  %}" class="btn btn-goto">Перейти</a></div>
             </div>
-            <div>
-                {% if buyer.stuffs.all %}
-                <span>Вещества:
-                    {% for stuff in buyer.stuffs.all %}
-                    {{ stuff.stuff_type.name }}
-                    {% endfor %}
-                {% endif %}
-                </span>
-            </div>
-             <div><a href="{% url 'update-buyer' buyer.id  %}" class="btn btn-goto">Перейти</a></div>
-        </div>
-    {% endfor %}
+            {% endfor %}
 
-</div>
-</div>
+        </div>
+    </div>
     {% endif %}
     <h1 class="header-1">Заполнение карточки покупателя</h1>
     <div class="container-form-card">
-        <form action={% if buyer.id %} {% url 'update-buyer' buyer.id  %} {% else %}{% url 'create-buyer'  %} {% endif %} method="post" class="form-card" enctype="multipart/form-data">
+        <form action={% if buyer.id %} {% url 'update-buyer' buyer.id %} {% else %}{% url 'create-buyer' %} {% endif %}
+            method="post" class="form-card" enctype="multipart/form-data">
             {{ mobiles_form.management_form }}
             {{ mobiles_numbers_form.management_form }}
             {{ stuff_form.management_form }}
+            {{ clads_form.management_form }}
+
+            {{ bank_form.management_form }}
+            {{ online_pay_form.management_form }}
+            {{ crypto_form.management_form }}
             <h2>Личные данные покупателя</h2>
             <div class="container-buyer-info">
                 <div class="container-buyer-field-set-1">
                     <div class="buyer-field-set-1-item">{{ buyer_form.first_name.label_tag }} {{ buyer_form.first_name }}</div>
 
-                    <div class="buyer-field-set-1-item">{{ buyer_form.last_name.label_tag }} {{ buyer_form.last_name }}</div>
+                    <div class="buyer-field-set-1-item">{{ buyer_form.last_name.label_tag }} {{ buyer_form.last_name }}
+                    </div>
                     <div class="buyer-field-set-1-item">{{ buyer_form.patronymic.label_tag }} {{ buyer_form.patronymic }}</div>
                     <div class="buyer-field-set-1-item">{{ buyer_form.birth_date.label_tag }} {{ buyer_form.birth_date }}</div>
                     {{ buyer_form.birth_date.errors }}
@@ -60,11 +67,16 @@
             </div>
             <h2>Мобильные данные покупателя</h2>
             <div class="container-buyer-mobile-info">
+                {% for mobile_form in mobiles_form %}
+                {% for hidden in mobile_form.hidden_fields %}
+                {{ hidden }}
+                {% endfor %}
                 <div class="container-buyer-field-set-2">
-                    {% for mobile_form in mobiles_form %}
+
                     <div class="mobile-hidden-field">{{ mobile_form.form_id }}</div>
                     <div class="container-buyer-field-set-2-subset-1">
-                        <div class="buyer-field-set-2-item">{{ mobile_form.imei.label_tag }} {{ mobile_form.imei }}</div>
+                        <div class="buyer-field-set-2-item">{{ mobile_form.imei.label_tag }} {{ mobile_form.imei }}
+                        </div>
                         {{ mobile_form.imei.errors }}
                     </div>
                     <div class="container-buyer-field-set-2-subset-2">
@@ -77,20 +89,24 @@
                         <div class="buyer-field-set-2-item">{{ mobile_form.password.label_tag }} {{ mobile_form.password }}</div>
                         {{ mobile_form.password.errors }}
                     </div>
-                    {% endfor %}
+
 
                 </div>
+                {% endfor %}
                 <button id="add-mobile" type="button" class="btn">Добавить</button>
             </div>
             <h2>Мобильные телефоны</h2>
             <div class="container-buyer-mobile-numbers">
                 {% for mobile_number_form in mobiles_numbers_form %}
+                {% for hidden in mobile_number_form.hidden_fields %}
+                {{ hidden }}
+                {% endfor %}
                 <div class="container-buyer-field-set-3">
                     <span>{{ mobile_number_form.number.label_tag }}</span>
-                    <span class="buyer-field-set-3-item buyer-field-set-3-item-number-code">+{{ mobile_number_form.code }}</span>
-                    {{ mobile_number_form.code.errors }}
-                    <span class="buyer-field-set-3-item"> {{ mobile_number_form.number }}</span>
-                    {{ mobile_number_form.number.errors }}
+                    <div>
+                    <div class="buyer-field-set-3-item"> {{ mobile_number_form.number }} <div>{{ mobile_number_form.number.errors }}</div></div>
+
+                </div>
                 </div>
                 {% endfor %}
                 <button id="add-mobile-number" type="button" class="btn">Добавить</button>
@@ -100,6 +116,9 @@
             <h2>Описание изъятого вещества</h2>
             <div class="container-buyer-stuff">
                 {% for stuff in stuff_form %}
+                {% for hidden in stuff.hidden_fields %}
+                {{ hidden }}
+                {% endfor %}
                 <div class="container-buyer-field-set-4">
                     <div class="buyer-field-set-4-item">{{ stuff.stuff_type.label_tag }} {{ stuff.stuff_type }}</div>
                     {{ stuff.stuff_type.errors }}
@@ -115,8 +134,10 @@
             <h2>Сведения об интернет-магазине</h2>
             <div class="container-buyer-shop-info">
                 <div class="container-buyer-field-set-5">
-                    <div class="buyer-field-set-5-item">{{ buyer_form.shop_type.label_tag }} {{ buyer_form.shop_type }}</div>
-                    <div class="buyer-field-set-5-item">{{ buyer_form.shop_name.label_tag }} {{ buyer_form.shop_name }}</div>
+                    <div class="buyer-field-set-5-item">{{ buyer_form.shop_type.label_tag }} {{ buyer_form.shop_type }}
+                    </div>
+                    <div class="buyer-field-set-5-item">{{ buyer_form.shop_name.label_tag }} {{ buyer_form.shop_name }}
+                    </div>
                     <div class="buyer-field-set-5-item ">{{ buyer_form.shop_address.label_tag }} {{ buyer_form.shop_address }}</div>
                     <div class="buyer-field-set-5-item shop_type_1 display-none" switch="shop">{{ buyer_form.shop_messanger_name.label_tag }} {{ buyer_form.shop_messanger_name }}</div>
                 </div>
@@ -124,58 +145,113 @@
 
             <h2>Аккаунт покупателя</h2>
             <div class="container-buyer-account">
-                <div class="shop_type_1 display-none"  switch="shop">
-                    <div class="buyer-field-set-5-item">{{ messanger_form.login.label_tag }} {{ messanger_form.login }}</div>
-                    <div class="buyer-field-set-5-item">{{ messanger_form.password.label_tag }} {{ messanger_form.password }}</div>
-                    <div class="buyer-field-set-5-item">{{ messanger_form.app_password.label_tag }} {{ messanger_form.app_password }}</div>
-                    <div class="buyer-field-set-5-item">{{ messanger_form.name.label_tag }} {{ messanger_form.name }}</div>
-                    <div class="buyer-field-set-5-item">{{ messanger_form.account_address.label_tag }} {{ messanger_form.account_address }}</div>
-                    <div class="buyer-field-set-5-item">{{ messanger_form.number.label_tag }} {{ messanger_form.number }}</div>
-                    <div class="buyer-field-set-5-item">{{ messanger_form.operator_nickname.label_tag }} {{ messanger_form.operator_nickname }}</div>
-                    <div class="buyer-field-set-5-item">{{ messanger_form.operator_account.label_tag }} {{ messanger_form.operator_account }}</div>
+                <div class="shop_type_1 shop_type_2 shop_type_3 display-none" switch="shop">
+                    <div class="buyer-field-set-5-item">{{ account.login.label_tag }} {{ account.login }}
+                    </div>
+                    <div class="buyer-field-set-5-item">{{ account.password.label_tag }} {{  account.password }}</div>
+                    <div class="buyer-field-set-5-item">{{ account.app_password.label_tag }} {{ account.app_password }}</div>
+                    <div class="buyer-field-set-5-item">{{ account.name.label_tag }} {{ account.name }}
+                    </div>
+                    <div class="shop_type_1 display-none" switch="shop">
 
+                        <div class="buyer-field-set-5-item">{{ account.account_address.label_tag }} {{ account.account_address }}</div>
+                        <div class="buyer-field-set-5-item">{{ account.number.label_tag }} {{ account.number }}</div>
+                        <div class="buyer-field-set-5-item">{{ account.operator_nickname.label_tag }} {{ account.operator_nickname }}</div>
+                        <div class="buyer-field-set-5-item">{{ account.operator_account.label_tag }} {{ account.operator_account }}</div>
+                    </div>
                 </div>
-                <div class="shop_type_2 display-none"  switch="shop">
-                    <div class="buyer-field-set-5-item">{{ site_form.login.label_tag }} {{ site_form.login }}</div>
-                    <div class="buyer-field-set-5-item">{{ site_form.password.label_tag }} {{ site_form.password }}</div>
-                    <div class="buyer-field-set-5-item">{{ site_form.app_password.label_tag }} {{ site_form.app_password }}</div>
-                </div>
-                <div class="shop_type_3 display-none"  switch="shop">
-                    <div class="buyer-field-set-5-item">{{ dark_web_form.login.label_tag }} {{ dark_web_form.login }}</div>
-                    <div class="buyer-field-set-5-item">{{ dark_web_form.password.label_tag }} {{ dark_web_form.password }}</div>
-                    <div class="buyer-field-set-5-item">{{ dark_web_form.app_password.label_tag }} {{ dark_web_form.app_password }}</div>
-                </div>
+
             </div>
 
             <h2>Способ оплаты</h2>
             <div class="container-buyer-payment">
-                <div class="container-buyer-field-set-7">
-                    <div class="buyer-field-set-7-item">{{ buyer_form.payment.label_tag }} {{ buyer_form.payment }}</div>
+                <h3>Банковская карта</h3>
+                <div class="container-buyer-payment-bank">
+                    {% for bank in bank_form %}
+                    {% for hidden in bank.hidden_fields %}
+                    {{ hidden }}
+                    {% endfor %}
+                    <div class="container-buyer-payment-field-set-7-1">
+                        <div class="buyer-field-set-7-item">{{ bank.name.label_tag }} {{ bank.name }}</div>
+                        {{ bank.bank_name.errors }}
+                        <div class="buyer-field-set-7-item">{{ bank.card_number.label_tag }} {{ bank.card_number }}
+                        </div>
+                        {{ bank.card_number.errors }}
+                    </div>
+                    {% endfor %}
+                    <button id="add-bank" type="button" class="btn">Добавить</button>
+
                 </div>
-                <h3>Дополнительная Информация</h3>
-                <div class="payment_type_1 display-none"  switch="payment">
-                    <div class="buyer-field-set-7-item">{{ buyer_form.bank_name.label_tag }} {{ buyer_form.bank_name }}</div>
-                    <div class="buyer-field-set-7-item">{{ buyer_form.bank_card_number.label_tag }} {{ buyer_form.bank_card_number }}</div>
+                <h3>Электронные платежи</h3>
+                <div class="container-buyer-payment-online_pay">
+                    {% for online_pay in online_pay_form %}
+                    {% for hidden in online_pay.hidden_fields %}
+                    {{ hidden }}
+                    {% endfor %}
+                    <div class="container-buyer-payment-field-set-7-2">
+                        <div class="buyer-field-set-7-item">{{ online_pay.name.label_tag }} {{ online_pay.name }}</div>
+                        {{ online_pay.name.errors }}
+                        <div class="buyer-field-set-7-item">{{ online_pay.account.label_tag }} {{ online_pay.account }}
+                        </div>
+                        {{ online_pay.account.errors }}
+                    </div>
+                    {% endfor %}
+                    <button id="add-online_pay" type="button" class="btn">Добавить</button>
+
                 </div>
-                <div class="payment_type_2 display-none"  switch="payment">
-                    <div class="buyer-field-set-7-item">{{ buyer_form.online_pay_name.label_tag }} {{ buyer_form.online_pay_name }}</div>
-                    <div class="buyer-field-set-7-item">{{ buyer_form.online_pay_account.label_tag }} {{ buyer_form.online_pay_account }}</div>
-                </div>
-                <div class="payment_type_3 display-none"  switch="payment">
-                    <div class="buyer-field-set-7-item">{{ buyer_form.crypto_name.label_tag }} {{ buyer_form.crypto_name }}</div>
-                    <div class="buyer-field-set-7-item">{{ buyer_form.crypto_address_wallet.label_tag }} {{ buyer_form.crypto_address_wallet }}</div>
+
+                <h3>Криптовалюта</h3>
+                <div class="container-buyer-payment-crypto">
+
+                    {% for crypto in crypto_form %}
+                    {% for hidden in crypto.hidden_fields %}
+                    {{ hidden }}
+                    {% endfor %}
+                    <div class="container-buyer-payment-field-set-7-3">
+                        <div class="buyer-field-set-7-item">{{ crypto.name.label_tag }} {{ crypto.name }}</div>
+                        {{ crypto.name.errors }}
+                        <div class="buyer-field-set-7-item">{{ crypto.address_wallet.label_tag }} {{ crypto.address_wallet }}</div>
+                        {{ crypto.address_wallet.errors }}
+                    </div>
+                    {% endfor %}
+                    <button id="add-crypto" type="button" class="btn">Добавить</button>
+
                 </div>
             </div>
-
-
-
             <h2>Информация об арресте</h2>
             <div class="container-buyer-arrest">
                 <div class="container-buyer-field-set-8">
                     <div class="buyer-field-set-8-item">{{ buyer_form.crime_place.label_tag }} {{ buyer_form.crime_place }}</div>
                     <div class="buyer-field-set-8-item">{{ buyer_form.arrest_date.label_tag }} {{ buyer_form.arrest_date }}</div>
-                    <div class="buyer-field-set-8-item">{{ buyer_form.clad_coordinates.label_tag }} {{ buyer_form.clad_coordinates }}</div>
+                    <div>
+                        <!-- <div class="buyer-field-set-8-item">{{ buyer_form.clad_lng.label_tag }} {{ buyer_form.clad_lng }}</div>
+                    <div class="buyer-field-set-8-item">{{ buyer_form.clad_lat.label_tag }} {{ buyer_form.clad_lat }}</div> -->
+                    </div>
                 </div>
+            </div>
+
+            <h2>Информация об закладке</h2>
+            <div class="container-clad">
+                {% for clad in clads_form %}
+                {% for hidden in clad.hidden_fields %}
+                {{ hidden }}
+                {% endfor %}
+                <div class="container-buyer-field-set-9">
+                    <div class="buyer-field-set-9-item">{{ clad.clad_type }}</div>
+                    <div class="buyer-field-set-9-item">{{ clad.lng.label_tag }} {{ clad.lng }}</div>
+                    {{ clad.lng.errors }}
+                    <div class="buyer-field-set-9-item">{{ clad.lat.label_tag }} {{ clad.lat }}</div>
+                    {{ clad.lat.errors }}
+                    <div class="buyer-field-set-9-item">{{ clad.photo.label_tag }} {{ clad.photo }}</div>
+                    {{ clad.photo.errors }}
+                    {% if clad.photo.value %}
+
+                    <div class="buyer-field-set-9-item"><img class="common-image" src={{ clad.photo.value.url }} ></div>
+                    {% endif %}
+
+                </div>
+                {% endfor %}
+                <button id="add-clad" type="button" class="btn">Добавить</button>
             </div>
 
             {% csrf_token %}
@@ -184,75 +260,39 @@
     </div>
 </main>
 <script>
-        setInterval(()=>Autocomplete(), 1000)
-        let mobileForm = document.querySelectorAll(".container-buyer-field-set-2")
-        let mobileContainer = document.querySelector(".container-buyer-mobile-info")
-        let mobileAddButton = document.querySelector("#add-mobile")
-        let mobileTotalForms = document.querySelector("#id_mobiles-TOTAL_FORMS")
+    setInterval(() => Autocomplete(), 1000)
 
-        let mobileFormNum = mobileForm.length-1
-        mobileAddButton.addEventListener('click', addMobileForm)
+    function initAddfForm(formSelector, containerSelector, buttonSelector, totalFormsSelector, formPrefix) {
+        const Form = document.querySelectorAll(formSelector);
+        const Container = document.querySelector(containerSelector);
+        const Button = document.querySelector(buttonSelector);
+        const TotalForms = document.querySelector(totalFormsSelector);
 
-        function addMobileForm(e){
-            e.preventDefault()
+        let FormNum = Form.length - 1;
+        Button.addEventListener('click', addForm);
+        console.log(Button)
+        console.log(Container)
 
-            let newForm = mobileForm[0].cloneNode(true)
-            let formRegex = RegExp(`mobiles-(\\d){1,}-`,'g')
+        function addForm(e) {
+            e.preventDefault();
 
+            const newForm = Form[0].cloneNode(true);
+            const formRegex = RegExp(`${formPrefix}-(\\d){1,}-`, 'g');
 
-            mobileFormNum++
-            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `mobiles-${mobileFormNum}-`)
-            mobileContainer.insertBefore(newForm, mobileAddButton)
-
-            mobileTotalForms.setAttribute('value', `${mobileFormNum+1}`)
+            FormNum++;
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${formPrefix}-${FormNum}-`);
+            Container.insertBefore(newForm, Button);
+            TotalForms.setAttribute('value', `${FormNum + 1}`);
         }
-
-
-        let mobileNumberForm = document.querySelectorAll(".container-buyer-field-set-3")
-        let mobileNumberContainer = document.querySelector(".container-buyer-mobile-numbers")
-        let mobileNumberAddButton = document.querySelector("#add-mobile-number")
-        let mobileNumberTotalForms = document.querySelector("#id_mobiles-numbers-TOTAL_FORMS")
-
-        let mobileNumberFormNum = mobileNumberForm.length-1
-        mobileNumberAddButton.addEventListener('click', addMobileNumberForm)
-
-        function addMobileNumberForm(e){
-            e.preventDefault()
-
-            let newForm = mobileNumberForm[0].cloneNode(true)
-            let formRegex = RegExp(`mobiles-numbers-(\\d){1,}-`,'g')
-
-
-            mobileNumberFormNum++
-            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `mobiles-numbers-${mobileNumberFormNum}-`)
-            mobileNumberContainer.insertBefore(newForm, mobileNumberAddButton)
-
-            mobileNumberTotalForms.setAttribute('value', `${mobileNumberFormNum+1}`)
-        }
-
-        let stuffForm = document.querySelectorAll(".container-buyer-field-set-4")
-        let stuffContainer = document.querySelector(".container-buyer-stuff")
-        let stuffAddButton = document.querySelector("#add-stuff")
-        let stuffTotalForms = document.querySelector("#id_stuff-TOTAL_FORMS")
-
-        let stuffFormNum = stuffForm.length-1
-        stuffAddButton.addEventListener('click', addStuffForm)
-
-        function addStuffForm(e){
-            e.preventDefault()
-
-            let newForm = stuffForm[0].cloneNode(true)
-            let formRegex = RegExp(`stuff-(\\d){1,}-`,'g')
-
-
-            stuffFormNum++
-            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `stuff-${stuffFormNum}-`)
-            stuffContainer.insertBefore(newForm, stuffAddButton)
-
-            stuffTotalForms.setAttribute('value', `${stuffFormNum+1}`)
-        }
+    }
+    initAddfForm(".container-buyer-payment-field-set-7-1", ".container-buyer-payment-bank", "#add-bank", "#id_bank-TOTAL_FORMS", "bank");
+    initAddfForm(".container-buyer-payment-field-set-7-2", ".container-buyer-payment-online_pay", "#add-online_pay", "#id_online-pay-TOTAL_FORMS", "online-pay");
+    initAddfForm(".container-buyer-payment-field-set-7-3", ".container-buyer-payment-crypto", "#add-crypto", "#id_crypto-TOTAL_FORMS", "crypto");
+    initAddfForm(".container-buyer-field-set-9", ".container-clad", "#add-clad", "#id_clads-TOTAL_FORMS", "clads");
+    initAddfForm(".container-buyer-field-set-4", ".container-buyer-stuff", "#add-stuff", "#id_stuff-TOTAL_FORMS", "stuff");
+    initAddfForm(".container-buyer-field-set-3", ".container-buyer-mobile-numbers", "#add-mobile-number", "#id_mobiles-numbers-TOTAL_FORMS", "mobiles-numbers");
+    initAddfForm(".container-buyer-field-set-2", ".container-buyer-mobile-info", "#add-mobile", "#id_mobiles-TOTAL_FORMS", "mobiles");
 
 
 </script>
 {% endblock main %}
-

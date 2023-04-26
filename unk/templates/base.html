@@ -18,7 +18,7 @@
     <header class="header">
         <nav class="nav">
             <a class="nav-link {% if '/buyer' in request.path  %}nav-link-active{% endif %}" href="{% url 'buyer' %}"><div>Покупатель</div></a>
-            <a class="nav-link {% if '/seller' in request.path  %}nav-link-active{% endif %}" href="{% url 'seller' %}"><div>Сбытчик</div></a>
+            <a class="nav-link {% if '/seller' in request.path  %}nav-link-active{% endif %}" href="{% url 'create-seller' %}"><div>Сбытчик</div></a>
             <a class="nav-link {% if '/search' in request.path  %}nav-link-active{% endif %}" href="{% url 'search' %}"><div>Поиск</div></a>
         </nav>
     </header>
