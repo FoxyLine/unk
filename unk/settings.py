@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 
-# Application definition
+# Application definitiongit
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -166,4 +166,5 @@ HAYSTACK_CONNECTIONS = {
 }
 HAYSTACK_DOCUMENT_FIELD = "doc_id"
 HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
-ES = Elasticsearch(hosts=[{"host": ELASTIC_HOST}])
+ES = Elasticsearch(hosts=[{"host": ELASTIC_HOST, "scheme": "http", "port": 9200}])
+CSRF_TRUSTED_ORIGINS = ['https://projects.masu.edu.ru']
