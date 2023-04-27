@@ -20,10 +20,29 @@
             {% for buyer in similar_buyers %}
             <div class="similar-buyer">
                 <div>
-                    <div><span>{{ buyer.first_name }}</span></div>
-                    <div><span>{{ buyer.last_name }}</span></div>
-                    <div><span>{{ buyer.patranomyc }}</span></div>
-                    <div><span>Дата Рождения: {{ buyer.birth_date }}</span></div>
+                    {% if buyer.first_name is none %}
+                        <div><span>Имя: </span></div>
+                    {% else %}
+                        <div><span>Имя: {{ buyer.first_name }}</span></div>
+                    {% endif %}
+                        {% if buyer.last_name is none %}
+                        <div><span>Фамилия: </span></div>
+                    {% else %}
+                        <div><span>Фамилия: {{ buyer.last_name }}</span></div>
+                    {% endif %}
+
+                    {% if buyer.patranomyc is none %}
+                        <div><span>Отчество: </span></div>
+                    {% else %}
+                        <div><span>Отчество: {{ buyer.patranomyc }}</span></div>
+                    {% endif %}
+
+                    {% if buyer.birth_date is none %}
+                        <div><span>Дата Рождения: </span></div>
+                    {% else %}
+                        <div><span>Дата Рождения: {{ buyer.birth_date }}</span></div>
+                    {% endif %}
+
                 </div>
                 <div>
                     {% if buyer.stuffs.all %}

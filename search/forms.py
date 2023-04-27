@@ -31,6 +31,7 @@ SEARCH_OPTION = {
 
 
 class MySearchForm(SearchForm):
+    full_text = forms.CharField(required=False, label="Общий поиск")
     first_name = forms.CharField(required=False, label="Имя")
     last_name = forms.CharField(required=False, label="Фамилия")
     patronymic = forms.CharField(required=False, label="Отчество")
@@ -164,6 +165,11 @@ class MySearchForm(SearchForm):
             if data[data_field]:
                 filters.append(insensitive_part_clause(es_field, data[data_field]))
 
+        if data['full_text']:
+            filters.append(
+                {"match": {"full_text": {"query": data['full_text']}}}
+            )
+
         if data["stuffs"]:
             operator = "AND" if data["all_stuffs"] else "or"
             query = data["stuffs"].replace(SEPARATOR, " ")
@@ -171,6 +177,7 @@ class MySearchForm(SearchForm):
             filters.append(
                 {"match": {"stuffs.name": {"query": query, "operator": operator}}}
             )
+
 
         if data["start_stuff_mass"] or data["end_stuff_mass"]:
             range_clause = {"range": {"stuffs.mass": {}}}

@@ -7,6 +7,15 @@
     width: 60%;
     margin: 0 auto;
 }
+.search-table-column-stuffs {
+    text-align: center;
+}
+.search-table {
+    margin: 0 auto;
+    width: 90%;
+    border-spacing: 8px;
+    border-collapse: collapse;
+}
 
 .search-result {
     width: 512px;
@@ -26,10 +35,11 @@
 
 .search-form-field-container {
     display: flex;
+    flex-direction: column;
+    padding-left: 32px;
 }
 
 .search-form-field {
-    margin: 0 16px;
 }
 
 .search-container {
@@ -40,3 +50,55 @@
     width: 100%;
 }
 
+.search-form-container {
+    width: 20%;
+}
+
+.search-result-container {
+    width: 80%;
+}
+
+.search-inner-container {
+    display: flex;
+}
+
+.search-filter-block {
+    margin-bottom: 16px;
+}
+
+
+.common-search-block .search-form-field,
+.stuffs-search-block .search-form-field,
+.mobiles-search-block .search-form-field,
+{
+    display: flex;
+    justify-content: space-between;
+    margin-right: 64px;
+}
+
+
+.common-search-block .field-name, .common-search-block .input-field,
+.stuffs-search-block .field-name, .stuffs-search-block .input-field,
+.mobiles-search-block .field-name, .mobiles-search-block .input-field,
+.payments-search-block .field-name, .payments-search-block .input-field,
+.account-search-block .field-name, .account-search-block .input-field{
+    display: inline-block;
+
+}
+
+.mobile-numbers {display: block !important;}
+.mobile-numbers input {
+    width: 100%;
+}
+
+.payments-search-block .search-form-field,
+.account-search-block .search-form-field{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin-right: 64px;
+}
+
+.payments-search-block h4 {
+    margin-top: 8px;
+}

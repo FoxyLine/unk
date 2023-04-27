@@ -14,6 +14,7 @@ class MultiValueObjectField(indexes.MultiValueField):
 class BuyerIndex(indexes.SearchIndex, indexes.Indexable):
     doc_id = indexes.CharField(document=True)
     text = indexes.CharField(use_template=True)
+    full_text = indexes.CharField(null=True)
     last_name = indexes.CharField(model_attr="last_name", null=True)
     first_name = indexes.CharField(model_attr="first_name", null=True)
     patronymic = indexes.CharField(model_attr="patronymic", null=True)
@@ -30,6 +31,39 @@ class BuyerIndex(indexes.SearchIndex, indexes.Indexable):
     # clads = MultiValueObjectField()
     mobile_numbers = MultiValueObjectField()
     accounts = MultiValueObjectField()
+
+    def prepare_full_text(self, obj: Buyer):
+        full_text = ""
+        full_text += obj.last_name or ""
+        full_text += " "
+        full_text += obj.first_name or ""
+        full_text += " "
+        full_text += obj.patronymic or ""
+        full_text += " "
+        full_text += str(obj.birth_date) or ""
+        full_text += " "
+        full_text += str(obj.payment) or ""
+        full_text += " "
+        full_text += str(obj.crime_place) or ""
+        full_text += " "
+        full_text += str(obj.arrest_date) or ""
+        full_text += " "
+
+        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_stuffs(obj)])
+        full_text += " "
+        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_cryptos(obj)])
+        full_text += " "
+        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_online_pays(obj)])
+        full_text += " "
+        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_banks(obj)])
+        full_text += " "
+        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_mobiles(obj)])
+        full_text += " "
+        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_mobile_numbers(obj)])
+        full_text += " "
+        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_accounts(obj)])
+
+        return full_text
 
     def prepare_cryptos(self, obj: Buyer):
         return [model_to_dict(c) for c in obj.cryptos.all()]

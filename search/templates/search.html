@@ -7,6 +7,13 @@
 {{ form.media }}
 {% endblock styles %}
 {% block main %}
+<style>
+    .collapse {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease-out;
+    }
+  </style>
 <main>
     <div class="search-container">
         <h1 class="header-1 ">Поиск скупщиков</h1>
@@ -15,54 +22,136 @@
                 <div class="search-form">
                     <form action="{% url 'search' %}" method="POST">
                         <div class="search-form-field-container">
-                            <div class="form-field-pair">
-                                <div class="search-form-field">{{ form.first_name.label }}: {{ form.first_name }}</div>
-                                <div class="search-form-field">{{ form.last_name.label }}: {{ form.last_name }}</div>
-                                <div class="search-form-field">{{ form.patronymic.label }}: {{ form.patronymic }}</div>
+                            <div class="search-filter-block form-field-pair common-search-block">
+                                <div class="search-form-field"><div class="field-name">{{ form.full_text.label }}:</div> <div class="input-field">{{ form.full_text }}</div></div>
                             </div>
-                            <div class="form-field-pair">
-                                <div class="search-form-field">{{ form.start_birth_date.label }}: {{ form.start_birth_date }}</div>
-                                <div class="search-form-field">{{ form.end_birth_date.label }}: {{ form.end_birth_date }}</div>
+                            <div class="search-filter-block form-field-pair common-search-block" >
+                                <h3 onclick="toggleContent('common-search-block-toggle')">Общие данные</h3>
+                                <div id="common-search-block-toggle" class="collapse">
+                                <div class="search-form-field"><div class="field-name">{{ form.first_name.label }}:</div> <div class="input-field">{{ form.first_name }}</div></div>
+                                <div class="search-form-field"><div class="field-name">{{ form.last_name.label }}:</div> <div class="input-field">{{ form.last_name }}</div></div>
+                                <div class="search-form-field"><div class="field-name">{{ form.patronymic.label }}:</div> <div class="input-field">{{ form.patronymic }}</div></div>
+                                <div class="search-form-field"><div class="field-name">{{ form.start_birth_date.label }}:</div> <div class="input-field">{{ form.start_birth_date }}</div></div>
+                                <div class="search-form-field"><div class="field-name">{{ form.end_birth_date.label }}:</div> <div class="input-field">{{ form.end_birth_date }}</div></div>
                             </div>
-                            <div class="search-form-stuffs"> Вещества:
-                                <div class="search-form-field">{{ form.stuffs }}</div>
-                                <div class="search-form-field">{{ form.all_stuffs.label }}: {{ form.all_stuffs }}</div>
-                                <span>Масса</span>
-                                <div class="search-form-stuffs-mass">{{ form.start_stuff_mass.label}} {{ form.start_stuff_mass}} {{ form.start_stuff_mass_unit }}</div>
-                                <div class="search-form-stuffs-mass">{{ form.end_stuff_mass.label}} {{ form.end_stuff_mass}} {{ form.end_stuff_mass_unit }}</div>
                             </div>
-                            <div>
-                                <h3>Мобильные телефоны</h3>
+                            <div class="search-filter-block search-form-stuffs stuffs-search-block">
+                                <h3 onclick="toggleContent('stuffs-search-block-toggle')">Наркотические Вещества</h3>
+                                <div id="stuffs-search-block-toggle" class="collapse">
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.stuffs.label }}</div>
+                                        <div class="input-field">{{ form.stuffs }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.all_stuffs.label }}: <span > {{ form.all_stuffs }}</span></div>
 
-                                <div class="search-form-field">{{ form.mobile_imei.label}}: {{ form.mobile_imei }}</div>
-                                <div class="search-form-field">{{ form.mobile_brand.label}}: {{ form.mobile_brand }}</div>
-                                <div class="search-form-field">{{ form.mobile_model.label}}: {{ form.mobile_model }}</div>
-                                <div class="search-form-field">{{ form.mobile_password.label}}: {{ form.mobile_password }}</div>
-                                <div class="search-form-field">{{ form.mobile_number_search_option}}{{ form.mobile_number.label}}: {{ form.mobile_number  }}</div>
+                                    </div>
+                                    <span>Масса</span>
+                                    <div class="search-form-stuffs-mass">
+                                        <div class="field-name">{{ form.start_stuff_mass.label}}:</div>
+                                        <div class="input-field">{{ form.start_stuff_mass}} {{ form.start_stuff_mass_unit }}</div>
+                                    </div>
+                                    <div class="search-form-stuffs-mass">
+                                        <div class="field-name">{{ form.end_stuff_mass.label}}:</div>
+                                        <div class="input-field">{{ form.end_stuff_mass}} {{ form.end_stuff_mass_unit }}</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <h3>Способы оплаты</h3>
-                                <h4>Банковская карта</h4>
-                                <div class="search-form-field">{{ form.bank_name.label }}: {{ form.bank_name }}</div>
-                                <div class="search-form-field">{{ form.bank_card_number.label }}: {{ form.bank_card_number }}</div>
-                                <h4>Электронные платежи</h4>
-                                <div class="search-form-field">{{ form.online_pay_name.label }}: {{ form.online_pay_name }}</div>
-                                <div class="search-form-field">{{ form.online_pay_account.label }}: {{ form.online_pay_account }}</div>
-                                <h4>Криптовалюта</h4>
-                                <div class="search-form-field">{{ form.crypto_name.label }}: {{ form.crypto_name }}</div>
-                                <div class="search-form-field">{{ form.crypto_address_wallet.label }}: {{ form.crypto_address_wallet }}</div>
+                            <div class="search-filter-block mobiles-search-block">
+                                <h3 onclick="toggleContent('mobiles-search-block-toggle')">Мобильные телефоны</h3>
+                                <div id="mobiles-search-block-toggle" class="collapse">
 
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.mobile_imei.label}}:</div>
+                                        <div class="input-field">{{ form.mobile_imei }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.mobile_brand.label}}:</div>
+                                        <div class="input-field">{{ form.mobile_brand }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.mobile_model.label}}:</div>
+                                        <div class="input-field"> {{ form.mobile_model }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.mobile_password.label}}:</div>
+                                        <div class="input-field"> {{ form.mobile_password }}</div>
+                                    </div>
+                                    <div class="mobile-numbers search-form-field">
+                                        <div>{{ form.mobile_number.label}}:</div>
+                                        <div class="input-field">{{ form.mobile_number_search_option}}{{ form.mobile_number  }}</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <h3>Аккаунт покупателя</h3>
-                                <div class="search-form-field">{{ form.account_login.label }}: {{ form.account_login }}</div>
-                                <div class="search-form-field">{{ form.account_password.label }}: {{ form.account_password }}</div>
-                                <div class="search-form-field">{{ form.account_app_password.label }}: {{ form.account_app_password }}</div>
-                                <div class="search-form-field">{{ form.account_name.label }}: {{ form.account_name }}</div>
-                                <div class="search-form-field">{{ form.account_address.label }}: {{ form.account_address }}</div>
-                                <div class="search-form-field">{{ form.account_number.label }}: {{ form.account_number }}</div>
-                                <div class="search-form-field">{{ form.account_operator_nickname.label }}: {{ form.account_operator_nickname }}</div>
-                                <div class="search-form-field">{{ form.account_operator_account.label }}: {{ form.account_operator_account }}</div>
+                            <div class="search-filter-block payments-search-block">
+                                <h3 onclick="toggleContent('payments-search-block-toggle')">Способы оплаты</h3>
+                                <div id="payments-search-block-toggle" class="collapse">
+                                    <h4>Банковская карта</h4>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.bank_name.label }}:</div>
+                                        <div class="input-field"> {{ form.bank_name }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.bank_card_number.label }}:</div>
+                                        <div class="input-field"> {{ form.bank_card_number }}</div>
+                                    </div>
+
+                                    <h4>Электронные платежи</h4>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.online_pay_name.label }}:</div>
+                                        <div class="input-field"> {{ form.online_pay_name }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.online_pay_account.label }}:</div>
+                                    <div class="input-field"> {{ form.online_pay_account }}</div>
+                                    </div>
+                                    <h4>Криптовалюта</h4>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.crypto_name.label }}:</div>
+                                    <div class="input-field"> {{ form.crypto_name }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.crypto_address_wallet.label }}:</div>
+                                        <div class="input-field"> {{ form.crypto_address_wallet }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="search-filter-block account-search-block">
+                                <h3 onclick="toggleContent('account-search-block-toggle')">Аккаунт покупателя</h3>
+                                <div  id="account-search-block-toggle" class="collapse">
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.account_login.label }}: </div>
+                                        <div class="input-field"> {{ form.account_login }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.account_password.label }}: </div>
+                                        <div class="input-field"> {{ form.account_password }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.account_app_password.label }}: </div>
+                                        <div class="input-field"> {{ form.account_app_password }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.account_name.label }}: </div>
+                                        <div class="input-field"> {{ form.account_name }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.account_address.label }}: </div>
+                                        <div class="input-field"> {{ form.account_address }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.account_number.label }}: </div>
+                                        <div class="input-field"> {{ form.account_number }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.account_operator_nickname.label }}: </div>
+                                        <div class="input-field"> {{ form.account_operator_nickname }}</div>
+                                    </div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.account_operator_account.label }}: </div>
+                                        <div class="input-field"> {{ form.account_operator_account }}</div>
+                                    </div>
+                                </div>
                             </div>
                             <button type="submit" value="Найти" class="btn">Найти</button>
                             {% csrf_token %}
@@ -73,7 +162,7 @@
             <div class="search-result-container">
                 <div class="search-result-container-inner">
                     {% if result %}
-                    <table class="buyer-table">
+                    <table class="search-table">
                         <tbody class="buyer-body-table">
                             <tr class="buyer-table-column-container">
                                 <th class="buyer-table-column buyer-table-column-header buyer-table-column-first-name">Имя
@@ -86,28 +175,50 @@
                                 </th>
                                 <th class="buyer-table-column buyer-table-column-header buyer-table-column-birth-date">Дата
                                     рождения</th>
+                                    <th>Вещества</th>
                                 <th>
                                     <div class="create-buyer-btn-container"><a class="btn-create"
                                             href="{% url 'create-buyer' %}">Создать</a></div>
                                 </th>
-                                <!-- <th></th> -->
+
                             </tr>
                             {% for buyer in result %}
                             <tr class="buyer-table-column-container">
-                                <td class="buyer-table-column buyer-table-column-first-name">{{ buyer.first_name }} </td>
-                                <td class="buyer-table-column buyer-table-column-last-name">{{ buyer.last_name }} </td>
-                                <td class="buyer-table-column buyer-table-column-patrnomic">{{ buyer.patronymic }} </td>
-                                <td class="buyer-table-column buyer-table-column-birth-date">{{ buyer.birth_date }}</td>
-                                <!-- <td class="buyer-table-column buyer-table-column-birth-date">
-                                     <div>
+                                <td class="buyer-table-column buyer-table-column-first-name">
+                                    {% if buyer.first_name is none %}
+                                        -
+                                    {% else %}
+                                        {{ buyer.first_name }}
+                                    {% endif %}
+                                </td>
+                                <td class="buyer-table-column buyer-table-column-last-name">
+                                    {% if buyer.last_name is none %}
+                                        -
+                                    {% else %}
+                                        {{ buyer.last_name }}
+                                    {% endif %}
+                                </td>
+                                <td class="buyer-table-column buyer-table-column-patrnomic">
+                                    {% if buyer.patronymic is none %}
+                                        -
+                                    {% else %}
+                                        {{ buyer.patronymic }}
+                                    {% endif %}
+                                </td>
+                                <td class="buyer-table-column buyer-table-column-birth-date">
+                                    {% if buyer.birth_date is none %}
+                                       -
+                                    {% else %}
+                                        {{ buyer.birth_date }}
+                                    {% endif %}
+                                </td>
+                                <td class="search-table-column search-table-column-stuffs">
                                     {% if buyer.stuffs.all %}
-                                    <span>Вещества:
                                         {% for stuff in buyer.stuffs.all %}
-                                        {{ stuff.stuff_type.name }}:{{ stuff.mass }}:{{ stuff.unit }}
+                                        {{ stuff.stuff_type.name }},
                                         {% endfor %}
                                         {% endif %}
-                                    </span>
-                                </div></td> -->
+                                </td>
                                 <td class="buyer-table-column buyer-table-column-edit"><a class="btn-edit"
                                         href="{% url 'update-buyer' buyer.id %}">Изменить</a></td>
                             </tr>
@@ -125,5 +236,13 @@
 </main>
 <script>
     setInterval(() => Autocomplete(), 1000)
+        function toggleContent(id) {
+          var content = document.getElementById(id);
+          if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+          } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+          }
+        }
 </script>
 {% endblock main %}

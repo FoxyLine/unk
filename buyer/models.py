@@ -208,13 +208,13 @@ class Buyer(models.Model):
     )
 
     first_name = models.CharField(
-        max_length=255, verbose_name="Имя", null=True, blank=True, default=None
+        max_length=255, verbose_name="Имя", null=True, blank=True, default=""
     )
     last_name = models.CharField(
-        max_length=255, verbose_name="Фамилия", null=True, blank=True, default=None
+        max_length=255, verbose_name="Фамилия", null=True, blank=True, default=""
     )
     patronymic = models.CharField(
-        max_length=255, verbose_name="Отчество", null=True, blank=True, default=None
+        max_length=255, verbose_name="Отчество", null=True, blank=True, default=""
     )
     birth_date = models.DateField(verbose_name="Дата рождения", null=True, blank=True)
 
