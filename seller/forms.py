@@ -38,4 +38,5 @@ class SellerForm(forms.ModelForm):
 class MasterCladForm(forms.ModelForm):
     class Meta:
         model = Clad
-        fields = ["lng", "lat", "photo"]
+        fields = ["photo", "latitude", "longitude"]
+        widgets = {"photo": forms.FileInput(attrs={"onchange": "setFileName(event)"})}

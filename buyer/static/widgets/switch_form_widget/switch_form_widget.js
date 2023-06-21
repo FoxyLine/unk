@@ -5,7 +5,7 @@ function switchForm(event, group_switch, ids_forms) {
     console.log(forms);
     forms.forEach(form => {
         if (form.classList.contains(ids_forms.at( selectBox.selectedIndex-1))){
-            form.style.display = "unset"
+            form.style.display = null
         } else {
             form.style.display = "none"
         }

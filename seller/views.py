@@ -34,7 +34,9 @@ from .forms import MasterCladForm
 
 
 def seller_index(request):
-    return render(request, template_name="seller.html")
+    return render(
+        request, template_name="seller.html", context={"sellers": Seller.objects.all()}
+    )
 
 
 def create_seller(request, seller_id=None):
@@ -185,9 +187,6 @@ def create_seller(request, seller_id=None):
                     "crypto_form": crypto_form,
                     "clads_form": clads_form,
                     "master_clads_form": master_clads_form,
-                    # "messanger_form": messenger_form,
-                    # "site_form": site_form,
-                    # "dark_web_form": dark_web_form,
                     # "similar_buyers": similar_buyers,
                 },
             )
@@ -263,9 +262,6 @@ def create_seller(request, seller_id=None):
             "crypto_form": crypto_form,
             "clads_form": clads_form,
             "master_clads_form": master_clads_form,
-            # "messanger_form": messenger_form,
-            # "site_form": site_form,
-            # "dark_web_form": dark_web_form,
             # "similar_buyers": similar_buyers,
         },
     )

@@ -84,12 +84,18 @@ class MySearchForm(SearchForm):
 
     start_stuff_mass = forms.FloatField(required=False, label="От")
     start_stuff_mass_unit = forms.ChoiceField(
-        required=False, label="", choices=Stuff.UNIT_CHOICES
+        required=False,
+        label="",
+        choices=Stuff.UNIT_CHOICES,
+        widget=forms.widgets.Select(attrs={"class": "stuff-mass-unit"}),
     )
 
     end_stuff_mass = forms.FloatField(required=False, label="До")
     end_stuff_mass_unit = forms.ChoiceField(
-        required=False, label="", choices=Stuff.UNIT_CHOICES
+        required=False,
+        label="",
+        choices=Stuff.UNIT_CHOICES,
+        widget=forms.widgets.Select(attrs={"class": "stuff-mass-unit"}),
     )
 
     mobile_imei = forms.CharField(required=False, label="IMEI-номер")
@@ -105,7 +111,9 @@ class MySearchForm(SearchForm):
 
     bank_name = forms.CharField(required=False, label="Название банка")
     bank_card_number = forms.CharField(required=False, label="Номер банковской карты")
-    online_pay_name = forms.CharField(required=False, label="Название платежной системы")
+    online_pay_name = forms.CharField(
+        required=False, label="Название платежной системы"
+    )
     online_pay_account = forms.CharField(required=False, label="Номер счета")
     crypto_name = forms.CharField(required=False, label="Название криптовалюты")
     crypto_address_wallet = forms.CharField(required=False, label="Адрес кошелька")
@@ -115,9 +123,13 @@ class MySearchForm(SearchForm):
     account_app_password = forms.CharField(required=False, label="Пароль приложения")
     account_name = forms.CharField(required=False, label="Имя аккаунта")
     account_address = forms.CharField(required=False, label="«Аккаунт-адрес»")
-    account_number = forms.CharField(required=False, label="Абонентский номер (привязанный к аккаунту)")
-    account_operator_nickname = forms.CharField(required=False, label="Ник-нейм оператора")
-    account_operator_account = forms.CharField(required=False, label="Аккаунт оператора")
+    account_number = forms.CharField(required=False, label="Абонентский номер")
+    account_operator_nickname = forms.CharField(
+        required=False, label="Ник-нейм оператора"
+    )
+    account_operator_account = forms.CharField(
+        required=False, label="Аккаунт оператора"
+    )
 
     def search(self):
         if not self.is_valid():
@@ -165,10 +177,8 @@ class MySearchForm(SearchForm):
             if data[data_field]:
                 filters.append(insensitive_part_clause(es_field, data[data_field]))
 
-        if data['full_text']:
-            filters.append(
-                {"match": {"full_text": {"query": data['full_text']}}}
-            )
+        if data["full_text"]:
+            filters.append({"match": {"full_text": {"query": data["full_text"]}}})
 
         if data["stuffs"]:
             operator = "AND" if data["all_stuffs"] else "or"
@@ -177,7 +187,6 @@ class MySearchForm(SearchForm):
             filters.append(
                 {"match": {"stuffs.name": {"query": query, "operator": operator}}}
             )
-
 
         if data["start_stuff_mass"] or data["end_stuff_mass"]:
             range_clause = {"range": {"stuffs.mass": {}}}

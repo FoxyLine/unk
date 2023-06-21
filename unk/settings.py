@@ -89,14 +89,14 @@ DATABASES = {
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.contrib.gis.db.backends.postgis",
-#         'NAME': 'postgres',
-#         'USER': 'postgres',
-#         'PASSWORD': 'postgres',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
+#         "NAME": "postgres",
+#         "USER": "postgres",
+#         "PASSWORD": "postgres",
+#         "HOST": "localhost",
+#         "PORT": "5432",
 #     }
 # }
-
+# GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal306.dll"
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -119,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru-ru"
 
 TIME_ZONE = "UTC"
 
@@ -167,4 +167,4 @@ HAYSTACK_CONNECTIONS = {
 HAYSTACK_DOCUMENT_FIELD = "doc_id"
 HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
 ES = Elasticsearch(hosts=[{"host": ELASTIC_HOST, "scheme": "http", "port": 9200}])
-CSRF_TRUSTED_ORIGINS = ['https://projects.masu.edu.ru']
+CSRF_TRUSTED_ORIGINS = ["https://projects.masu.edu.ru"]

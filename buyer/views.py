@@ -30,12 +30,6 @@ from .forms import (
 from .elastic import more_like_buyer_by_id
 
 
-# from django.contrib.contenttypes.models import ContentType
-# ct = ContentType.objects.get_for_id(content_type)
-# obj = ct.get_object_for_this_type(pk=object_id)
-
-
-# Create your views here.
 def create_buyer(request, buyer_id=None):
     StuffFormSet = modelformset_factory(
         Stuff,
@@ -136,8 +130,14 @@ def create_buyer(request, buyer_id=None):
                     instance = model_class(**form)
                     if isinstance(form.get("id"), model_class):
                         instance.id = form["id"].id
-                    if model_class == Clad and form.get("photo") != "":
+                    if (
+                        model_class == Clad
+                        and form.get("photo") != ""
+                        and form.get("photo") is not None
+                    ):
                         instance.photo = form.get("photo")
+                    elif model_class == Clad and instance.id:
+                        instance.photo = Clad.objects.get(pk=instance.id).photo
                     instance.save()
                     instances.append(instance)
                 if model_class == Clad:
@@ -205,7 +205,6 @@ def create_buyer(request, buyer_id=None):
             crypto_form = CryptoFormSet(
                 queryset=buyer_instance.cryptos.all(), prefix="crypto"
             )
-
         else:
             mobiles_form = MobileFormSet(
                 queryset=MobileNumber.objects.none(), prefix="mobiles"

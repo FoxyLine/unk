@@ -6,43 +6,46 @@
 <link rel="stylesheet" href="{% static 'widgets\autocomplete\autocomplete.css' %}">
 
 <script type="text/javascript" src="{% static 'widgets\autocomplete\autocomplete.js' %}"></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
 
 {{ seller_form.media }}
 {% endblock styles %}
 
 {% block main %}
-
-<main class="main">
+<main class="card">
     {% if similar_sellers %}
-    <div class="container-similar-sellers">
-    <h2 class="header-2">Похожие скупщики</h2>
-    <div class="similar-sellers">
-    {% for seller in similar_sellers %}
-        <div class="similar-seller">
-            <div>
-                <div><span>{{ seller.first_name }}</span></div>
-                <div><span>{{ seller.last_name }}</span></div>
-                <div><span>{{ seller.patranomyc }}</span></div>
-                <div><span>Дата Рождения: {{ seller.birth_date }}</span></div>
+    <div class="container-similar">
+        <h2 class="header-2">Похожие скупщики</h2>
+        <div class="similars">
+        {% for seller in similar_sellers %}
+            <div class="similar">
+                <div class="similar-common-fields">
+                    <div><span>{{ seller.first_name }}</span></div>
+                    <div><span>{{ seller.last_name }}</span></div>
+                    <div><span>{{ seller.patranomyc }}</span></div>
+                    <div><span>Дата Рождения: {{ seller.birth_date }}</span></div>
+                </div>
+                <div>
+                    {% if seller.stuffs.all %}
+                    <span>Вещества:
+                        {% for stuff in seller.stuffs.all %}
+                        {{ stuff.stuff_type.name }}
+                        {% endfor %}
+                    {% endif %}
+                    </span>
+                </div>
+                <div><a href="{% url 'update-seller' seller.id  %}" class="btn btn-goto">Перейти</a></div>
             </div>
-            <div>
-                {% if seller.stuffs.all %}
-                <span>Вещества:
-                    {% for stuff in seller.stuffs.all %}
-                    {{ stuff.stuff_type.name }}
-                    {% endfor %}
-                {% endif %}
-                </span>
-            </div>
-             <div><a href="{% url 'update-seller' seller.id  %}" class="btn btn-goto">Перейти</a></div>
+        {% endfor %}
         </div>
-    {% endfor %}
-
-</div>
-</div>
+    </div>
     {% endif %}
-    <h1 class="header-1">Заполнение карточки покупателя</h1>
+
     <div class="container-form-card">
+        <h1 class="header-1">Заполнение карточки Сбытчика</h1>
         <form action={% if seller.id %} {% url 'update-seller' seller.id  %} {% else %}{% url 'create-seller'  %} {% endif %} method="post" class="form-card" enctype="multipart/form-data">
             {{ mobiles_form.management_form }}
             {{ mobiles_numbers_form.management_form }}
@@ -51,246 +54,279 @@
             {{ bank_form.management_form }}
             {{ online_pay_form.management_form }}
             {{ crypto_form.management_form }}
-
             {{ clads_form.management_form }}
             {{ master_clads_form.management_form }}
+            <div class="form-block-container">
+                <div class="form-block-container-left">
+                    <div class="form-block">
+                        <h2>Личные данные покупателя</h2>
+                        <div class="container-seller-info">
+                            <div class="container-seller-field-set-1">
+                                <div class="seller-field-set-1-item">{{ seller_form.first_name.label_tag }} {{ seller_form.first_name }}</div>
+                                <div class="seller-field-set-1-item">{{ seller_form.last_name.label_tag }} {{ seller_form.last_name }}</div>
+                                <div class="seller-field-set-1-item">{{ seller_form.patronymic.label_tag }} {{ seller_form.patronymic }}</div>
+                                <div class="seller-field-set-1-item">{{ seller_form.birth_date.label_tag }} {{ seller_form.birth_date }}</div>
+                                {{ seller_form.birth_date.errors }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-block">
+                        <h2>Мобильные данные</h2>
+                        <div class="container-seller-mobile-info">
+                            <div class="container-seller-field-set-2">
+                                {% for mobile_form in mobiles_form %}
+                                    {% for hidden in mobile_form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                <div class="mobile-hidden-field">{{ mobile_form.form_id }}</div>
+                                <div class="seller-field-set-2-item">{{ mobile_form.imei.label_tag }} {{ mobile_form.imei }}</div>
+                                {{ mobile_form.imei.errors }}
+                                <div class="seller-field-set-2-item">{{ mobile_form.mobile_brand.label_tag }} {{ mobile_form.mobile_brand }}</div>
+                                {{ mobile_form.mobile_brand.errors }}
+                                <div class="seller-field-set-2-item">{{ mobile_form.mobile_model.label_tag }} {{ mobile_form.mobile_model }}</div>
+                                {{ mobile_form.mobile_model.errors }}
+                                <div class="seller-field-set-2-item">{{ mobile_form.password.label_tag }} {{ mobile_form.password }}</div>
+                                {{ mobile_form.password.errors }}
+                                {% endfor %}
 
+                            </div>
+                            <button id="add-mobile" type="button" class="btn">Добавить</button>
+                        </div>
+                    </div>
+                    <div class="form-block">
+                        <h2 class="form-block-header">Способ оплаты</h2>
+                        <div class="container-seller-payment">
+                            <h3 class="form-h3">Банковская карта</h3>
+                            <div class="container-seller-payment-bank">
+                                {% for bank in bank_form %}
+                                {% for hidden in bank.hidden_fields %}
+                                {{ hidden }}
+                                {% endfor %}
+                                <div class="container-seller-payment-field-set-8-1">
+                                    <div class="seller-field-set-8-item">{{ bank.name.label_tag }} {{ bank.name }}</div>
+                                    {{ bank.bank_name.errors }}
+                                    <div class="seller-field-set-8-item">{{ bank.card_number.label_tag }} {{ bank.card_number }}
+                                    </div>
+                                    {{ bank.card_number.errors }}
+                                </div>
+                                {% endfor %}
+                                <button id="add-bank" type="button" class="btn">Добавить</button>
+                            </div>
+                            <h3 class="form-h3">Электронные платежи</h3>
+                            <div class="container-seller-payment-online_pay">
+                                {% for online_pay in online_pay_form %}
+                                {% for hidden in online_pay.hidden_fields %}
+                                {{ hidden }}
+                                {% endfor %}
+                                <div class="container-seller-payment-field-set-8-2">
+                                    <div class="seller-field-set-8-item">{{ online_pay.name.label_tag }} {{ online_pay.name }}</div>
+                                    {{ online_pay.name.errors }}
+                                    <div class="seller-field-set-8-item">{{ online_pay.account.label_tag }} {{ online_pay.account }}
+                                    </div>
+                                    {{ online_pay.account.errors }}
+                                </div>
+                                {% endfor %}
+                                <button id="add-online_pay" type="button" class="btn">Добавить</button>
 
-            <h2>Личные данные покупателя</h2>
-            <div class="container-seller-info">
-                <div class="container-seller-field-set-1">
-                    <div class="seller-field-set-1-item">{{ seller_form.first_name.label_tag }} {{ seller_form.first_name }}</div>
+                            </div>
 
-                    <div class="seller-field-set-1-item">{{ seller_form.last_name.label_tag }} {{ seller_form.last_name }}</div>
-                    <div class="seller-field-set-1-item">{{ seller_form.patronymic.label_tag }} {{ seller_form.patronymic }}</div>
-                    <div class="seller-field-set-1-item">{{ seller_form.birth_date.label_tag }} {{ seller_form.birth_date }}</div>
-                    {{ seller_form.birth_date.errors }}
+                            <h3 class="form-h3">Криптовалюта</h3>
+                            <div class="container-seller-payment-crypto">
+
+                                {% for crypto in crypto_form %}
+                                {% for hidden in crypto.hidden_fields %}
+                                {{ hidden }}
+                                {% endfor %}
+                                <div class="container-seller-payment-field-set-8-3">
+                                    <div class="seller-field-set-8-item">{{ crypto.name.label_tag }} {{ crypto.name }}</div>
+                                    {{ crypto.name.errors }}
+                                    <div class="seller-field-set-8-item">{{ crypto.address_wallet.label_tag }} {{ crypto.address_wallet }}</div>
+                                    {{ crypto.address_wallet.errors }}
+                                </div>
+                                {% endfor %}
+                                <button id="add-crypto" type="button" class="btn">Добавить</button>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-block">
+                        <h2>Информация об арресте</h2>
+                        <div class="container-seller-arrest">
+                            <div class="container-seller-field-set-9">
+                                <div class="seller-field-set-9-item">{{ seller_form.crime_place.label_tag }} {{ seller_form.crime_place }}</div>
+                                <div class="seller-field-set-9-item">{{ seller_form.arrest_date.label_tag }} {{ seller_form.arrest_date }}</div>
+                                <div>
+                                <div class="seller-field-set-9-item">{{ seller_form.clad_lng.label_tag }} {{ seller_form.clad_lng }}</div>
+                                <div class="seller-field-set-9-item">{{ seller_form.clad_lat.label_tag }} {{ seller_form.clad_lat }}</div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <h2>Мобильные данные покупателя</h2>
-            <div class="container-seller-mobile-info">
-                <div class="container-seller-field-set-2">
-                    {% for mobile_form in mobiles_form %}
-                        {% for hidden in mobile_form.hidden_fields %}
+                <div class="form-block-container-right">
+                    <div class="form-block">
+                        <h2>Мобильные телефоны</h2>
+                        <div class="container-seller-mobile-numbers">
+                            {% for mobile_number_form in mobiles_numbers_form %}
+                                {% for hidden in mobile_number_form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+                            <div class="container-seller-field-set-3">
+                                <div class="seller-field-set-3-item">{{ mobile_number_form.number.label_tag }} {{ mobile_number_form.number }}
+                                    {{ mobile_number_form.number.errors }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                            <button id="add-mobile-number" type="button" class="btn">Добавить</button>
+                        </div>
+                    </div>
+                    <div class="form-block">
+                        <h2>Описание изъятого вещества</h2>
+                        <div class="container-seller-stuff">
+                            {% for stuff in stuff_form %}
+                                {% for hidden in stuff.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+                            <div class="container-seller-field-set-4">
+                                <div class="seller-field-set-4-item">{{ stuff.stuff_type.label_tag }} {{ stuff.stuff_type }}</div>
+                                {{ stuff.stuff_type.errors }}
+                                <div class="seller-field-set-4-item">{{ stuff.mass.label_tag }} {{ stuff.mass }}</div>
+                                {{ stuff.mass.errors }}
+                                <div class="seller-field-set-4-item">{{ stuff.unit.label_tag }} {{ stuff.unit }}</div>
+                                {{ stuff.unit.errors }}
+                            </div>
+                            {% endfor %}
+                            <button id="add-stuff" type="button" class="btn">Добавить</button>
+                        </div>
+                    </div>
+                    <div class="form-block">
+                        <h2>Сведения об интернет-магазине</h2>
+                        <div class="container-seller-shop-info">
+                            <div class="container-seller-field-set-5">
+                                <div class="seller-field-set-5-item">{{ seller_form.shop_type.label_tag }} {{ seller_form.shop_type }}</div>
+                                <div class="seller-field-set-5-item">{{ seller_form.shop_name.label_tag }} {{ seller_form.shop_name }}</div>
+                                <div class="seller-field-set-5-item ">{{ seller_form.shop_address.label_tag }} {{ seller_form.shop_address }}</div>
+                                <div class="seller-field-set-5-item shop_type_1 display-none" switch="shop">{{ seller_form.shop_messanger_name.label_tag }} {{ seller_form.shop_messanger_name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h2>Аккаунт покупателя</h2>
+                    <div class="form-block">
+                        <div class="container-seller-account">
+                            {% for account in internet_account_form %}
+                            {% for hidden in account.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                            <div class="shop_type_1 shop_type_2 shop_type_3 display-none container-seller-field-set-6" switch="shop">
+                                <div class="seller-field-set-6-item">{{ account.login.label_tag }} {{ account.login }}
+                                </div>
+                                <div class="seller-field-set-6-item">{{ account.password.label_tag }} {{  account.password }}</div>
+                                <div class="seller-field-set-6-item">{{ account.app_password.label_tag }} {{ account.app_password }}</div>
+                                <div class="seller-field-set-6-item">{{ account.name.label_tag }} {{ account.name }}
+                                </div>
+                                <div class="shop_type_1 display-none" switch="shop">
+                                    <div class="seller-field-set-6-item">{{ account.account_address.label_tag }} {{ account.account_address }}</div>
+                                    <div class="seller-field-set-6-item">{{ account.number.label_tag }} {{ account.number }}</div>
+                                    <div class="seller-field-set-6-item">{{ account.operator_nickname.label_tag }} {{ account.operator_nickname }}</div>
+                                    <div class="seller-field-set-6-item">{{ account.operator_account.label_tag }} {{ account.operator_account }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            <button id="add-internet-account" type="button" class="btn">Добавить</button>
+                        </div>
+                    </div>
+                    <div class="form-block">
+                        <h2>Информация об закладке</h2>
+                        <div class="container-clad">
+                            {% for clad in clads_form %}
+                            {% for hidden in clad.hidden_fields %}
                             {{ hidden }}
-                        {% endfor %}
-                    <div class="mobile-hidden-field">{{ mobile_form.form_id }}</div>
-                    <div class="container-seller-field-set-2-subset-1">
-                        <div class="seller-field-set-2-item">{{ mobile_form.imei.label_tag }} {{ mobile_form.imei }}</div>
-                        {{ mobile_form.imei.errors }}
-                    </div>
-                    <div class="container-seller-field-set-2-subset-2">
-                        <div class="seller-field-set-2-item">{{ mobile_form.mobile_brand.label_tag }} {{ mobile_form.mobile_brand }}</div>
-                        {{ mobile_form.mobile_brand.errors }}
-                        <div class="seller-field-set-2-item">{{ mobile_form.mobile_model.label_tag }} {{ mobile_form.mobile_model }}</div>
-                        {{ mobile_form.mobile_model.errors }}
-                    </div>
-                    <div class="container-seller-field-set-2-subset-3">
-                        <div class="seller-field-set-2-item">{{ mobile_form.password.label_tag }} {{ mobile_form.password }}</div>
-                        {{ mobile_form.password.errors }}
-                    </div>
-                    {% endfor %}
-
-                </div>
-                <button id="add-mobile" type="button" class="btn">Добавить</button>
-            </div>
-            <h2>Мобильные телефоны</h2>
-            <div class="container-seller-mobile-numbers">
-                {% for mobile_number_form in mobiles_numbers_form %}
-                    {% for hidden in mobile_number_form.hidden_fields %}
-                        {{ hidden }}
-                    {% endfor %}
-                <div class="container-seller-field-set-3">
-                    <span>{{ mobile_number_form.number.label_tag }}</span>
-                    <span class="seller-field-set-3-item"> {{ mobile_number_form.number }}</span>
-
-                </div>
-                {% endfor %}
-                <button id="add-mobile-number" type="button" class="btn">Добавить</button>
-            </div>
+                            {% endfor %}
+                            <div class="container-seller-field-set-10">
+                                <div style="
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: end;">
 
 
-            <h2>Описание изъятого вещества</h2>
-            <div class="container-seller-stuff">
-                {% for stuff in stuff_form %}
-                    {% for hidden in stuff.hidden_fields %}
-                        {{ hidden }}
-                    {% endfor %}
-                <div class="container-seller-field-set-4">
-                    <div class="seller-field-set-4-item">{{ stuff.stuff_type.label_tag }} {{ stuff.stuff_type }}</div>
-                    {{ stuff.stuff_type.errors }}
-                    <div class="seller-field-set-4-item">{{ stuff.mass.label_tag }} {{ stuff.mass }}</div>
-                    {{ stuff.mass.errors }}
-                    <div class="seller-field-set-4-item">{{ stuff.unit.label_tag }} {{ stuff.unit }}</div>
-                    {{ stuff.unit.errors }}
-                </div>
-                {% endfor %}
-                <button id="add-stuff" type="button" class="btn">Добавить</button>
-            </div>
-
-            <h2>Сведения об интернет-магазине</h2>
-            <div class="container-seller-shop-info">
-                <div class="container-seller-field-set-5">
-                    <div class="seller-field-set-5-item">{{ seller_form.shop_type.label_tag }} {{ seller_form.shop_type }}</div>
-                    <div class="seller-field-set-5-item">{{ seller_form.shop_name.label_tag }} {{ seller_form.shop_name }}</div>
-                    <div class="seller-field-set-5-item ">{{ seller_form.shop_address.label_tag }} {{ seller_form.shop_address }}</div>
-                    <div class="seller-field-set-5-item shop_type_1 display-none" switch="shop">{{ seller_form.shop_messanger_name.label_tag }} {{ seller_form.shop_messanger_name }}</div>
-                </div>
-            </div>
-
-            <h2>Аккаунт покупателя</h2>
-
-            <div class="container-seller-account">
-                {% for account in internet_account_form %}
-                {% for hidden in account.hidden_fields %}
-                    {{ hidden }}
-                {% endfor %}
-                <div class="shop_type_1 shop_type_2 shop_type_3 display-none container-seller-field-set-6" switch="shop">
-                    <div class="seller-field-set-6-item">{{ account.login.label_tag }} {{ account.login }}
-                    </div>
-                    <div class="seller-field-set-6-item">{{ account.password.label_tag }} {{  account.password }}</div>
-                    <div class="seller-field-set-6-item">{{ account.app_password.label_tag }} {{ account.app_password }}</div>
-                    <div class="seller-field-set-6-item">{{ account.name.label_tag }} {{ account.name }}
-                    </div>
-                    <div class="shop_type_1 display-none" switch="shop">
-
-                        <div class="seller-field-set-6-item">{{ account.account_address.label_tag }} {{ account.account_address }}</div>
-                        <div class="seller-field-set-6-item">{{ account.number.label_tag }} {{ account.number }}</div>
-                        <div class="seller-field-set-6-item">{{ account.operator_nickname.label_tag }} {{ account.operator_nickname }}</div>
-                        <div class="seller-field-set-6-item">{{ account.operator_account.label_tag }} {{ account.operator_account }}</div>
-                    </div>
-                </div>
-                {% endfor %}
-                <button id="add-internet-account" type="button" class="btn">Добавить</button>
-
-            </div>
-
-            <h2>Способ оплаты</h2>
-            <div class="container-seller-payment">
-                <h3>Банковская карта</h3>
-                <div class="container-seller-payment-bank">
-                    {% for bank in bank_form %}
-                    {% for hidden in bank.hidden_fields %}
-                    {{ hidden }}
-                    {% endfor %}
-                    <div class="container-seller-payment-field-set-8-1">
-                        <div class="seller-field-set-8-item">{{ bank.name.label_tag }} {{ bank.name }}</div>
-                        {{ bank.bank_name.errors }}
-                        <div class="seller-field-set-8-item">{{ bank.card_number.label_tag }} {{ bank.card_number }}
+                                    <span onclick="toggleMap(event)"><img class="map-icon" src="{% static 'img\pin.png' %}"></span>
+                                    <div class="collapse">
+                                        <div style='width: 400px; height: 300px;'></div>
+                                        <pre  class="coordinates"></pre>
+                                    </div>
+                                </div>
+                                <div></div>
+                                <div class="seller-field-set-10-item">{{ clad.longitude.label_tag }} {{ clad.longitude }}</div>
+                                {{ clad.longitude.errors }}
+                                <div class="seller-field-set-10-item">{{ clad.latitude.label_tag }} {{ clad.latitude }}</div>
+                                {{ clad.latitude.errors }}
+                                <div class="seller-field-set-10-item">
+                                    {{ clad.photo.label_tag }}
+                                    <label>
+                                    {{ clad.photo }}
+                                    <span class="file-input" id="file-input">Выберите файл</span>
+                                    </label>
+                                </div>
+                                {{ clad.photo.errors }}
+                                {% if clad.photo.value %}
+                                <div class="seller-field-set-10-item"><img class="common-image" src={{ clad.photo.value.url }} ></div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            <button id="add-clad" type="button" class="btn">Добавить</button>
                         </div>
-                        {{ bank.card_number.errors }}
                     </div>
-                    {% endfor %}
-                    <button id="add-bank" type="button" class="btn">Добавить</button>
-
-                </div>
-                <h3>Электронные платежи</h3>
-                <div class="container-seller-payment-online_pay">
-                    {% for online_pay in online_pay_form %}
-                    {% for hidden in online_pay.hidden_fields %}
-                    {{ hidden }}
-                    {% endfor %}
-                    <div class="container-seller-payment-field-set-8-2">
-                        <div class="buyer-field-set-8-item">{{ online_pay.name.label_tag }} {{ online_pay.name }}</div>
-                        {{ online_pay.name.errors }}
-                        <div class="buyer-field-set-8-item">{{ online_pay.account.label_tag }} {{ online_pay.account }}
+                    <div class="form-block">
+                        <h2>Информация о мастер-кладах</h2>
+                        <div class="container-master-clad">
+                            {% for clad in master_clads_form %}
+                            {% for hidden in clad.hidden_fields %}
+                            {{ hidden }}
+                            {% endfor %}
+                            <div class="container-seller-field-set-11">
+                                <div style="
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: end;">
+                                    <span onclick="toggleMap(event)"><img class="map-icon" src="{% static 'img\pin.png' %}"></span>
+                                    <div class="collapse">
+                                        <div style='width: 400px; height: 300px;'></div>
+                                        <pre  class="coordinates"></pre>
+                                    </div>
+                                </div>
+                                <div></div>
+                                <div class="seller-field-set-11-item">{{ clad.longitude.label_tag }} {{ clad.longitude }}</div>
+                                {{ clad.longitude.errors }}
+                                <div class="seller-field-set-11-item">{{ clad.latitude.label_tag }} {{ clad.latitude }}</div>
+                                {{ clad.latitude.errors }}
+                                <div class="seller-field-set-11-item">
+                                    {{ clad.photo.label_tag }}
+                                    <label>
+                                    {{ clad.photo }}
+                                    <span class="file-input" id="file-input">Выберите файл</span>
+                                    </label>
+                                </div>
+                                {{ clad.photo.errors }}
+                                {% if clad.photo.value %}
+                                <div class="seller-field-set-11-item"><img class="common-image" src={{ clad.photo.value.url }} ></div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            <button id="add-master-clad" type="button" class="btn">Добавить</button>
                         </div>
-                        {{ online_pay.account.errors }}
                     </div>
-                    {% endfor %}
-                    <button id="add-online_pay" type="button" class="btn">Добавить</button>
-
-                </div>
-
-                <h3>Криптовалюта</h3>
-                <div class="container-seller-payment-crypto">
-
-                    {% for crypto in crypto_form %}
-                    {% for hidden in crypto.hidden_fields %}
-                    {{ hidden }}
-                    {% endfor %}
-                    <div class="container-seller-payment-field-set-8-3">
-                        <div class="buyer-field-set-8-item">{{ crypto.name.label_tag }} {{ crypto.name }}</div>
-                        {{ crypto.name.errors }}
-                        <div class="buyer-field-set-8-item">{{ crypto.address_wallet.label_tag }} {{ crypto.address_wallet }}</div>
-                        {{ crypto.address_wallet.errors }}
-                    </div>
-                    {% endfor %}
-                    <button id="add-crypto" type="button" class="btn">Добавить</button>
-
                 </div>
             </div>
-
-
-            <h2>Информация об арресте</h2>
-            <div class="container-seller-arrest">
-                <div class="container-seller-field-set-9">
-                    <div class="seller-field-set-9-item">{{ seller_form.crime_place.label_tag }} {{ seller_form.crime_place }}</div>
-                    <div class="seller-field-set-9-item">{{ seller_form.arrest_date.label_tag }} {{ seller_form.arrest_date }}</div>
-                    <div>
-                    <div class="seller-field-set-9-item">{{ seller_form.clad_lng.label_tag }} {{ seller_form.clad_lng }}</div>
-                    <div class="seller-field-set-9-item">{{ seller_form.clad_lat.label_tag }} {{ seller_form.clad_lat }}</div>
-                </div>
-                </div>
-            </div>
-
-            <h2>Информация о сделанных закладок</h2>
-
-            <div class="container-clad">
-                {% for clad in clads_form %}
-                {% for hidden in clad.hidden_fields %}
-                {{ hidden }}
-                {% endfor %}
-                <div class="container-seller-field-set-10">
-                    <div class="seller-field-set-10-item">{{ clad.lng.label_tag }} {{ clad.lng }}</div>
-                    {{ clad.lng.errors }}
-                    <div class="seller-field-set-10-item">{{ clad.lat.label_tag }} {{ clad.lat }}</div>
-                    {{ clad.lat.errors }}
-                    <div class="seller-field-set-10-item">{{ clad.photo.label_tag }} {{ clad.photo }}</div>
-                    {{ clad.photo.errors }}
-                    {% if clad.photo.value %}
-                    <div class="seller-field-set-10-item"><img class="common-image" src={{ clad.photo.value.url }} ></div>
-                    {% endif %}
-
-                </div>
-                {% endfor %}
-                <button id="add-clad" type="button" class="btn">Добавить</button>
-            </div>
-
             {% csrf_token %}
-            <button type="submit" value="Submit" class="btn">Создать</button>
-
-
-            <h2>Информация о мастер-кладах</h2>
-            <div class="container-master-clad">
-                {% for clad in master_clads_form %}
-                {% for hidden in clad.hidden_fields %}
-                {{ hidden }}
-                {% endfor %}
-                <div class="container-seller-field-set-11">
-                    <div class="seller-field-set-11-item">{{ clad.lng.label_tag }} {{ clad.lng }}</div>
-                    {{ clad.lng.errors }}
-                    <div class="seller-field-set-11-item">{{ clad.lat.label_tag }} {{ clad.lat }}</div>
-                    {{ clad.lat.errors }}
-                    <div class="seller-field-set-11-item">{{ clad.photo.label_tag }} {{ clad.photo }}</div>
-                    {{ clad.photo.errors }}
-                    {% if clad.photo.value %}
-                    <div class="seller-field-set-11-item"><img class="common-image" src={{ clad.photo.value.url }} ></div>
-                    {% endif %}
-
-                </div>
-                {% endfor %}
-                <button id="add-master-clad" type="button" class="btn">Добавить</button>
-            </div>
-
-            {% csrf_token %}
-            <button type="submit" value="Submit" class="btn">Создать</button>
+            <button type="submit" value="Submit" class="btn btn-middle">Создать</button>
         </form>
     </div>
 </main>
 <script>
         setInterval(()=>Autocomplete(), 1000)
-        function initAddfForm(formSelector, containerSelector, buttonSelector, totalFormsSelector, formPrefix) {
+        function initAddfForm(formSelector, containerSelector, buttonSelector, totalFormsSelector, formPrefix, callback) {
             const Form = document.querySelectorAll(formSelector);
             const Container = document.querySelector(containerSelector);
             const Button = document.querySelector(buttonSelector);
@@ -298,20 +334,20 @@
 
             let FormNum = Form.length - 1;
             Button.addEventListener('click', addForm);
-            console.log(Button)
-            console.log(Container)
 
             function addForm(e) {
                 e.preventDefault();
-
                 const newForm = Form[0].cloneNode(true);
                 const formRegex = RegExp(`${formPrefix}-(\\d){1,}-`, 'g');
-
                 FormNum++;
                 newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${formPrefix}-${FormNum}-`);
                 Container.insertBefore(newForm, Button);
                 TotalForms.setAttribute('value', `${FormNum + 1}`);
+                callback && callback(newForm);
             }
+        }
+        function clearMap(Form) {
+            Form.children[0].children[1].style.maxHeight = null
         }
         initAddfForm(
             ".container-seller-field-set-2",
@@ -320,7 +356,6 @@
             "#id_mobiles-TOTAL_FORMS",
             "mobiles"
         );
-
         initAddfForm(
             ".container-seller-field-set-3",
             ".container-seller-mobile-numbers",
@@ -328,7 +363,6 @@
             "#id_mobiles-numbers-TOTAL_FORMS",
             "mobiles-numbers"
         );
-
         initAddfForm(
             ".container-seller-field-set-4",
             ".container-seller-stuff",
@@ -343,12 +377,9 @@
             "#id_seller-inernet-account-TOTAL_FORMS",
             "seller-inernet-account"
         );
-
-
     initAddfForm(".container-seller-payment-field-set-8-1", ".container-seller-payment-bank", "#add-bank", "#id_bank-TOTAL_FORMS", "bank");
     initAddfForm(".container-seller-payment-field-set-8-2", ".container-seller-payment-online_pay", "#add-online_pay", "#id_online-pay-TOTAL_FORMS", "online-pay");
     initAddfForm(".container-seller-payment-field-set-8-3", ".container-seller-payment-crypto", "#add-crypto", "#id_crypto-TOTAL_FORMS", "crypto");
-
     initAddfForm(".container-seller-field-set-10", ".container-clad", "#add-clad", "#id_clads-TOTAL_FORMS", "clads");
     initAddfForm(".container-seller-field-set-11", ".container-master-clad", "#add-master-clad", "#id_master-clads-TOTAL_FORMS", "master-clads");
 

@@ -11,6 +11,10 @@ class MultiValueObjectField(indexes.MultiValueField):
     field_type = "object"
 
 
+class MultiValueGeoShapeField(indexes.MultiValueField):
+    field_type = "geo_shape"
+
+
 class BuyerIndex(indexes.SearchIndex, indexes.Indexable):
     doc_id = indexes.CharField(document=True)
     text = indexes.CharField(use_template=True)
@@ -28,7 +32,7 @@ class BuyerIndex(indexes.SearchIndex, indexes.Indexable):
     online_pays = MultiValueObjectField()
     banks = MultiValueObjectField()
     mobiles = MultiValueObjectField()
-    # clads = MultiValueObjectField()
+    clads = MultiValueGeoShapeField()
     mobile_numbers = MultiValueObjectField()
     accounts = MultiValueObjectField()
 
@@ -49,19 +53,54 @@ class BuyerIndex(indexes.SearchIndex, indexes.Indexable):
         full_text += str(obj.arrest_date) or ""
         full_text += " "
 
-        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_stuffs(obj)])
+        full_text += " ".join(
+            [
+                " ".join(map(str, filter(lambda x: bool(x), s.values())))
+                for s in self.prepare_stuffs(obj)
+            ]
+        )
         full_text += " "
-        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_cryptos(obj)])
+        full_text += " ".join(
+            [
+                " ".join(map(str, filter(lambda x: bool(x), s.values())))
+                for s in self.prepare_cryptos(obj)
+            ]
+        )
         full_text += " "
-        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_online_pays(obj)])
+        full_text += " ".join(
+            [
+                " ".join(map(str, filter(lambda x: bool(x), s.values())))
+                for s in self.prepare_online_pays(obj)
+            ]
+        )
         full_text += " "
-        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_banks(obj)])
+        full_text += " ".join(
+            [
+                " ".join(map(str, filter(lambda x: bool(x), s.values())))
+                for s in self.prepare_banks(obj)
+            ]
+        )
         full_text += " "
-        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_mobiles(obj)])
+        full_text += " ".join(
+            [
+                " ".join(map(str, filter(lambda x: bool(x), s.values())))
+                for s in self.prepare_mobiles(obj)
+            ]
+        )
         full_text += " "
-        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_mobile_numbers(obj)])
+        full_text += " ".join(
+            [
+                " ".join(map(str, filter(lambda x: bool(x), s.values())))
+                for s in self.prepare_mobile_numbers(obj)
+            ]
+        )
         full_text += " "
-        full_text += " ".join([" ".join(map(str, filter(lambda x: bool(x), s.values()))) for s in self.prepare_accounts(obj)])
+        full_text += " ".join(
+            [
+                " ".join(map(str, filter(lambda x: bool(x), s.values())))
+                for s in self.prepare_accounts(obj)
+            ]
+        )
 
         return full_text
 
@@ -86,8 +125,14 @@ class BuyerIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_mobiles(self, obj):
         return [model_to_dict(mobile) for mobile in obj.mobiles.all()]
 
-    # def prepare_clads(self, obj):
-    # return [model_to_dict(clad) for clad in obj.clads.all()]
+    def prepare_clads(self, obj):
+        str_points = []
+        for clad in obj.clads.all():
+            if clad.latitude and clad.longitude:
+                str_lng_lat = str(clad.latitude) + " " + str(clad.longitude)
+                str_points.append(str_lng_lat)
+
+        return [f"POINT ({p})" for p in str_points]
 
     def prepare_mobile_numbers(self, obj):
         return [

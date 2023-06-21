@@ -130,10 +130,13 @@ class MobileNumberForm(forms.ModelForm):
 class CladForm(forms.ModelForm):
     class Meta:
         model = Clad
-        fields = ["lng", "lat", "photo"]
+        fields = ["photo", "latitude", "longitude"]
+        widgets = {"photo": forms.FileInput(attrs={"onchange": "setFileName(event)"})}
 
 
 class MobileForm(forms.ModelForm):
+    forms.CharField
+
     class Meta:
         model = Mobile
         fields = [

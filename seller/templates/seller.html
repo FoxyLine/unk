@@ -11,7 +11,7 @@
 {% endblock styles %}
 {% block main %}
 <main class="main">
-    <h1 style="text-align: center">Просмотр всех покупателей</h1>
+    <h1 style="text-align: center">Просмотр всех сбытчиков</h1>
     <div class="main-inner-container">
 
         <div class="table-conainer">
@@ -27,23 +27,17 @@
                             рождения</th>
                         <th>
                             <div class="create-btn-container"><a class="btn-create"
-                                    href="{% url 'create-buyer' %}"><div class="image-create"></div></a></div>
+                                    href="{% url 'create-seller' %}"><div class="image-create"></div></a></div>
                         </th>
                     </tr>
-                    {% for buyer in buyers %}
+                    {% for seller in sellers %}
                     <tr class="table-column-container">
-                        <td class="table-column table-column-first-name">{{ buyer.first_name }} </td>
-                        <td class="table-column table-column-last-name">{{ buyer.last_name }} </td>
-                        <td class="table-column table-column-patrnomic">{{ buyer.patronymic }} </td>
-                        <td class="table-column table-column-birth-date">
-                            {% if buyer.birth_date is none %}
-                            -
-                            {% else %}
-                                {{ buyer.birth_date }}
-                            {% endif %}
-                        </td>
+                        <td class="table-column table-column-first-name">{{ seller.first_name }} </td>
+                        <td class="table-column table-column-last-name">{{ seller.last_name }} </td>
+                        <td class="table-column table-column-patrnomic">{{ seller.patronymic }} </td>
+                        <td class="table-column table-column-birth-date">{{ seller.birth_date }}</td>
                         <td class="table-column table-column-edit">
-                            <a class="btn-edit" href="{% url 'update-buyer' buyer.id %}">
+                            <a class="btn-edit" href="{% url 'update-seller' seller.id %}">
                                 <div class="image-edit"></div></a></td>
                     </tr>
                     {% endfor %}

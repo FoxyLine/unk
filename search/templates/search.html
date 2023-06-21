@@ -2,18 +2,16 @@
 {% load static %}
 
 {% block styles %}
-<link rel="stylesheet" href="{% static 'base.css' %}">
 <link rel="stylesheet" href="{% static 'css\search.css' %}">
+
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+
 {{ form.media }}
 {% endblock styles %}
 {% block main %}
-<style>
-    .collapse {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.5s ease-out;
-    }
-  </style>
 <main>
     <div class="search-container">
         <h1 class="header-1 ">Поиск скупщиков</h1>
@@ -23,7 +21,10 @@
                     <form action="{% url 'search' %}" method="POST">
                         <div class="search-form-field-container">
                             <div class="search-filter-block form-field-pair common-search-block">
-                                <div class="search-form-field"><div class="field-name">{{ form.full_text.label }}:</div> <div class="input-field">{{ form.full_text }}</div></div>
+                                <div>
+                                    <div class="field-name">{{ form.full_text.label }}:</div>
+                                    <div class="input-field">{{ form.full_text }}</div>
+                                </div>
                             </div>
                             <div class="search-filter-block form-field-pair common-search-block" >
                                 <h3 onclick="toggleContent('common-search-block-toggle')">Общие данные</h3>
@@ -39,21 +40,19 @@
                                 <h3 onclick="toggleContent('stuffs-search-block-toggle')">Наркотические Вещества</h3>
                                 <div id="stuffs-search-block-toggle" class="collapse">
                                     <div class="search-form-field">
-                                        <div class="field-name">{{ form.stuffs.label }}</div>
+                                        <div class="field-name">{{ form.stuffs.label }}:</div>
                                         <div class="input-field">{{ form.stuffs }}</div>
                                     </div>
-                                    <div class="search-form-field">
-                                        <div class="field-name">{{ form.all_stuffs.label }}: <span > {{ form.all_stuffs }}</span></div>
-
-                                    </div>
-                                    <span>Масса</span>
-                                    <div class="search-form-stuffs-mass">
-                                        <div class="field-name">{{ form.start_stuff_mass.label}}:</div>
-                                        <div class="input-field">{{ form.start_stuff_mass}} {{ form.start_stuff_mass_unit }}</div>
-                                    </div>
-                                    <div class="search-form-stuffs-mass">
-                                        <div class="field-name">{{ form.end_stuff_mass.label}}:</div>
-                                        <div class="input-field">{{ form.end_stuff_mass}} {{ form.end_stuff_mass_unit }}</div>
+                                    <span style="text-align: end; display: block; margin-right: 64px;">Масса</span>
+                                    <div class="search-form-stuffs-mass-container">
+                                        <div class="search-form-stuffs-mass">
+                                            <div class="field-name">{{ form.start_stuff_mass.label}}:</div>
+                                            <div class="stuff-mass">{{ form.start_stuff_mass}} {{ form.start_stuff_mass_unit }}</div>
+                                        </div>
+                                        <div class="search-form-stuffs-mass" style="margin-left: 16px;">
+                                            <div class="field-name">{{ form.end_stuff_mass.label}}:</div>
+                                            <div class="stuff-mass">{{ form.end_stuff_mass}} {{ form.end_stuff_mass_unit }}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -77,10 +76,16 @@
                                         <div class="field-name">{{ form.mobile_password.label}}:</div>
                                         <div class="input-field"> {{ form.mobile_password }}</div>
                                     </div>
-                                    <div class="mobile-numbers search-form-field">
-                                        <div>{{ form.mobile_number.label}}:</div>
-                                        <div class="input-field">{{ form.mobile_number_search_option}}{{ form.mobile_number  }}</div>
+                                    <div class="search-form-field">
+                                        <div class="field-name">{{ form.mobile_number.label}}:</div>
+                                        <div class="input-field">{{ form.mobile_number  }}</div>
                                     </div>
+                                    <div class="search-form-field">
+                                        <div class="number-search-option">
+                                            <div class="input-field">{{ form.mobile_number_search_option}}</div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                             <div class="search-filter-block payments-search-block">
@@ -108,7 +113,7 @@
                                     <h4>Криптовалюта</h4>
                                     <div class="search-form-field">
                                         <div class="field-name">{{ form.crypto_name.label }}:</div>
-                                    <div class="input-field"> {{ form.crypto_name }}</div>
+                                    <div class="input-field">{{ form.crypto_name }}</div>
                                     </div>
                                     <div class="search-form-field">
                                         <div class="field-name">{{ form.crypto_address_wallet.label }}:</div>
@@ -164,48 +169,46 @@
                     {% if result %}
                     <table class="search-table">
                         <tbody class="buyer-body-table">
-                            <tr class="buyer-table-column-container">
-                                <th class="buyer-table-column buyer-table-column-header buyer-table-column-first-name">Имя
+                            <tr class="table-header">
+                                <th class="table-column buyer-table-column-header buyer-table-column-first-name">Имя
                                 </th>
-                                <th class="buyer-table-column buyer-table-column-header buyer-table-column-last-name">
+                                <th class="table-column buyer-table-column-header buyer-table-column-last-name">
                                     Фамилия
                                 </th>
-                                <th class="buyer-table-column buyer-table-column-header buyer-table-column-patrnomic">
+                                <th class="table-column buyer-table-column-header buyer-table-column-patrnomic">
                                     Отчество
                                 </th>
-                                <th class="buyer-table-column buyer-table-column-header buyer-table-column-birth-date">Дата
+                                <th class="table-column buyer-table-column-header buyer-table-column-birth-date">Дата
                                     рождения</th>
-                                    <th>Вещества</th>
+                                    <th>Вещества:</th>
                                 <th>
-                                    <div class="create-buyer-btn-container"><a class="btn-create"
-                                            href="{% url 'create-buyer' %}">Создать</a></div>
+                                    <div class="create-buyer-btn-container"></div>
                                 </th>
-
                             </tr>
                             {% for buyer in result %}
                             <tr class="buyer-table-column-container">
-                                <td class="buyer-table-column buyer-table-column-first-name">
+                                <td class="table-column buyer-table-column-first-name">
                                     {% if buyer.first_name is none %}
                                         -
                                     {% else %}
                                         {{ buyer.first_name }}
                                     {% endif %}
                                 </td>
-                                <td class="buyer-table-column buyer-table-column-last-name">
+                                <td class="table-column buyer-table-column-last-name">
                                     {% if buyer.last_name is none %}
                                         -
                                     {% else %}
                                         {{ buyer.last_name }}
                                     {% endif %}
                                 </td>
-                                <td class="buyer-table-column buyer-table-column-patrnomic">
+                                <td class="table-column buyer-table-column-patrnomic">
                                     {% if buyer.patronymic is none %}
                                         -
                                     {% else %}
                                         {{ buyer.patronymic }}
                                     {% endif %}
                                 </td>
-                                <td class="buyer-table-column buyer-table-column-birth-date">
+                                <td class="table-column buyer-table-column-birth-date">
                                     {% if buyer.birth_date is none %}
                                        -
                                     {% else %}
@@ -219,16 +222,21 @@
                                         {% endfor %}
                                         {% endif %}
                                 </td>
-                                <td class="buyer-table-column buyer-table-column-edit"><a class="btn-edit"
-                                        href="{% url 'update-buyer' buyer.id %}">Изменить</a></td>
+                                <td class="buyer-table-column-edit">
+                                    <a class="btn-edit" href="{% url 'update-buyer' buyer.id %}"><div class="image-edit"></div></a>
+                                </td>
                             </tr>
-
                             {% endfor %}
-
                         </tbody>
                         {% else %}
-                        <div>По запросу ничего не найдено</div>
+                        <div><h3 style="text-align: center; font-size: 1.4em">По запросу ничего не найдено</h3></div>
                         {% endif %}
+                    </table>
+                </div>
+            </div>
+            <div class="search-map-container">
+                <div class="collapse0">
+                    <div id="map"></div>
                 </div>
             </div>
         </div>
@@ -244,5 +252,25 @@
             content.style.maxHeight = content.scrollHeight + "px";
           }
         }
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZm94eWxpbmUiLCJhIjoiY2xoNHg1YW01MDBqdzNjbXhjNXhqbWtmbyJ9.8hqV2_RfcMDY2Ax7mWPi1A';
+        const map = new mapboxgl.Map({
+            container: "map",
+            style: 'mapbox://styles/foxyline/clh4ycdv600on01qu29sk3s84',
+            center:  [33.074918, 68.970663],
+            zoom: 13,
+        });
+        const geo = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        })
+        {% for buyer in result %}
+            {% for clad in buyer.clads.all %}
+                {% if clad.latitude and clad.longitude %}
+                    new mapboxgl.Marker()
+                    .setLngLat([{{ clad.lng }}, {{ clad.lat }}])
+                    .addTo(map)
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
 </script>
 {% endblock main %}

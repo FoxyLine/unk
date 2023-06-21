@@ -1,6 +1,8 @@
-from email.policy import default
 from django.db import models
 from django.core.validators import RegexValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
+
+# from django.contrib import models
 
 import buyer
 
@@ -121,7 +123,7 @@ class InternetAccount(models.Model):
         verbose_name="«Аккаунт-адрес»", max_length=100, null=True, blank=True
     )
     number = models.CharField(
-        verbose_name="Абонентский номер (привязанный к аккаунту)",
+        verbose_name="Привязанный номер",
         max_length=100,
         null=True,
         blank=True,
@@ -302,7 +304,7 @@ class Buyer(models.Model):
 
     crime_place = models.CharField(
         max_length=255,
-        verbose_name="Место совершения преступления",
+        verbose_name="Место преступления",
         choices=CRIME_PLACE_CHOICES,
         null=True,
         blank=True,
@@ -336,25 +338,32 @@ class Clad(models.Model):
     type_clad = models.CharField(
         max_length=25, choices=TYPE_CLAD_CHOICES, blank=True, null=True, default=CLAD
     )
-    lng = models.DecimalField(
-        max_digits=11,
-        decimal_places=8,
+    latitude = models.FloatField(
+        validators=[MinValueValidator(-90.0), MaxValueValidator(90.0)],
         verbose_name="Координаты клада (долгота)",
         null=True,
         blank=True,
     )
-    lat = models.DecimalField(
-        max_digits=11,
-        decimal_places=8,
+    longitude = models.FloatField(
+        validators=[MinValueValidator(-180.0), MaxValueValidator(180.0)],
         verbose_name="Координаты клада (Ширина)",
         null=True,
         blank=True,
     )
+
     photo = models.ImageField(
         verbose_name="Фотография клада",
         null=True,
         blank=True,
     )
+
+    @property
+    def lat(self):
+        return str(self.latitude).replace(",", ".")
+
+    @property
+    def lng(self):
+        return str(self.longitude).replace(",", ".")
 
 
 class BuyerClads(models.Model):
